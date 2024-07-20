@@ -1,10 +1,14 @@
 import sqlite3
+from pathlib import Path
+
+PATH = Path(__file__).parent  # Path of the database
 
 
 class Database:
     """Class that handles interactions with the database."""
 
-    def __init__(self, name: str) -> None:
+    def __init__(self) -> None:
+        name = PATH.joinpath("score.db")
         self.__connection = sqlite3.connect(name)  # name must end with .db
         self.__cursor = self.__connection.cursor()
 
@@ -50,8 +54,9 @@ class Database:
             "date": date
         }.
         """
-        command = "INSERT INTO ? VALUES (?, ?, ?)"
-        data = (table, *tuple(values.values()))
+        command = "INSERT INTO {} (username, score, date) VALUES (?, ?, ?)"
+        command = command.format(table)
+        data = tuple(values.values())
 
         return self.execute_command(command, data)
 
@@ -61,4 +66,4 @@ class Database:
 
     def disconnect(self) -> bool:
         """Close the database connection."""
-        return bool(self.__connection.close())
+        return not bool(self.__connection.close())
