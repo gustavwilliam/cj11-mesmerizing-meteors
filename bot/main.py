@@ -18,15 +18,16 @@ async def merhaba(interaction: discord.Interaction) -> None:
     """Test command."""
     print(interaction.response)
     print(dir(interaction.response))
-    await interaction.response \
-        .send_message(f"Pong! {interaction.user.display_name}")
+    await interaction.response.send_message(f"Pong! {interaction.user.display_name}")
 
 
 # Embed message slash command
-@bot.tree.command(name="pages",
-                  description="""
+@bot.tree.command(
+    name="pages",
+    description="""
                   This command sends the embed message containing the pages!
-                  """)
+                  """,
+)
 async def embed_command(interaction: discord.Interaction) -> None:
     """Send the embed message containing the pages."""
     pages = [
@@ -51,4 +52,4 @@ async def on_ready() -> None:
 
 
 # Start the bot
-bot.run(getenv('DISCORD_BOT_KEY'))
+bot.run(getenv("DISCORD_BOT_KEY"))
