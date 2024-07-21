@@ -53,3 +53,4 @@ async def on_ready() -> None:
 
 # Start the bot
 bot.run(getenv("DISCORD_BOT_KEY"))
+
