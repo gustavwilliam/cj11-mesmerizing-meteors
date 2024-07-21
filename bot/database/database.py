@@ -27,14 +27,14 @@ class Database:
         """Close the database connection."""
         return not bool(self.__connection.close())
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Database name: {self.name}"
 
 
 class Score(Database):
     """Class that handles interactions with the Score table."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         command = """CREATE TABLE IF NOT EXISTS Score (
@@ -59,7 +59,7 @@ class Score(Database):
 class Quiz(Database):
     """Class that handles interactions with the Quizzes in the QUiz table."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         command = """CREATE TABLE IF NOT EXISTS Quiz (
