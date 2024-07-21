@@ -8,7 +8,6 @@ class Database:
     """Class that handles interactions with the database."""
 
     def __init__(self) -> None:
-
         # Default name of the database
         self.name = PATH.joinpath(".store.db")
 
@@ -27,14 +26,14 @@ class Database:
         """Close the database connection."""
         return not bool(self.__connection.close())
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Database name: {self.name}"
 
 
 class Score(Database):
     """Class that handles interactions with the Score table."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         command = """CREATE TABLE IF NOT EXISTS Score (
@@ -45,12 +44,10 @@ class Score(Database):
 
     def add_score(self, username: str, score: int) -> bool:
         """Add a score in the Score table."""
-
         command = "INSERT INTO Score (username, score) VALUES(?, ?)"
         return bool(self.execute_command(command, (username, score)))
 
     def remove_score(self, username: str) -> bool:
         """Remove a score in the Score table."""
-
         command = "DELETE FROM Score WHERE username = ?"
         return bool(self.execute_command(command, (username,)))
