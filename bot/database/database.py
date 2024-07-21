@@ -70,14 +70,12 @@ class Quiz(Database):
                 lesson TEXT NON NULL)"""
         super().execute_command(command)
 
-    def add_quiz(self, level: int, question: str,
-                 answer: str, lesson: str) -> bool:
+    def add_quiz(self, level: int, question: str, answer: str, lesson: str) -> bool:
         """Add a quiz in the Quiz table."""
 
         command = """INSERT INTO Quiz (level, question, answer, lesson)
         VALUES(?, ?, ?, ?)"""
-        return bool(self.execute_command(
-            command, (level, question, answer, lesson)))
+        return bool(self.execute_command(command, (level, question, answer, lesson)))
 
     def remove_quiz(self, id: int) -> bool:
         """Remove a quiz in the Quiz table."""
