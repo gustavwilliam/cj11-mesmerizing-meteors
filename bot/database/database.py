@@ -82,4 +82,3 @@ class Quiz(Database):
 
         command = "DELETE FROM Quiz WHERE id = ?"
         return bool(self.execute_command(command, (id,)))
-
