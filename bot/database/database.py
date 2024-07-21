@@ -8,7 +8,6 @@ class Database:
     """Class that handles interactions with the database."""
 
     def __init__(self) -> None:
-
         # Default name of the database
         self.name = PATH.joinpath(".store.db")
 
@@ -45,13 +44,11 @@ class Score(Database):
 
     def add_score(self, username: str, score: int) -> bool:
         """Add a score in the Score table."""
-
         command = "INSERT INTO Score (username, score) VALUES(?, ?)"
         return bool(self.execute_command(command, (username, score)))
 
     def remove_score(self, username: str) -> bool:
         """Remove a score in the Score table."""
-
         command = "DELETE FROM Score WHERE username = ?"
         return bool(self.execute_command(command, (username,)))
 
@@ -72,13 +69,11 @@ class Quiz(Database):
 
     def add_quiz(self, level: int, question: str, answer: str, lesson: str) -> bool:
         """Add a quiz in the Quiz table."""
-
         command = """INSERT INTO Quiz (level, question, answer, lesson)
         VALUES(?, ?, ?, ?)"""
         return bool(self.execute_command(command, (level, question, answer, lesson)))
 
     def remove_quiz(self, id: int) -> bool:
         """Remove a quiz in the Quiz table."""
-
         command = "DELETE FROM Quiz WHERE id = ?"
         return bool(self.execute_command(command, (id,)))
