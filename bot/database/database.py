@@ -8,62 +8,76 @@ class Database:
     """Class that handles interactions with the database."""
 
     def __init__(self) -> None:
-        name = PATH.joinpath("score.db")
-        self.__connection = sqlite3.connect(name)  # name must end with .db
+
+        # Default name of the database
+        self.name = PATH.joinpath("sto.db")
+
+        # Connection to the database
+        self.__connection = sqlite3.connect(self.name)
         self.__cursor = self.__connection.cursor()
 
     def execute_command(self, command: str, data: tuple = ()) -> bool:
         """Execute the given command."""
         if self.__cursor.execute(command, data):
-            self.__connection.commit()
+            self.__connection.commit()  # Commit the changes to the DB
             return True
         return False
-
-    """
-    @params:
-        - name: Name of the table
-
-    @returns: True if no problem occured. False otherwise
-    """
-
-    def add_table(self, name: str) -> bool:
-        """Add new table in the database."""
-        command = f"""CREATE TABLE IF NOT EXISTS {name} (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username TEXT NOT NULL,
-                score INTEGER NOT NULL,
-                date DATE NOT NULL)
-                """
-        return self.execute_command(command)
-
-    """
-    @params:
-        - table: Name of the table
-        - values: dictionary containing the values of the record
-
-    @returns: True if no problem occured. False otherwise
-    """
-
-    def add_record(self, table: str, values: dict) -> bool:
-        """Add new record(or line) in the database.
-
-        The `values` dictionary must have the following format:
-        {
-            "username": username,
-            "score": score,
-            "date": date
-        }.
-        """
-        command = "INSERT INTO {} (username, score, date) VALUES (?, ?, ?)"
-        command = command.format(table)
-        data = tuple(values.values())
-
-        return self.execute_command(command, data)
-
-    """
-    @returns: True if no problem occured. False otherwise
-    """
 
     def disconnect(self) -> bool:
         """Close the database connection."""
         return not bool(self.__connection.close())
+
+    def __str__(self):
+        return f"Database name: {self.name}"
+
+
+class Score(Database):
+    """Class that handles interactions with the Score table."""
+
+    def __init__(self):
+        super().__init__()
+
+        command = """CREATE TABLE IF NOT EXISTS Score (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT NON NULL,
+                score INTEGER NON NULL)"""
+        super().execute_command(command)
+
+    def add_score(self, username: str, score: int) -> bool:
+        """Add a score in the Score table."""
+
+        command = "INSERT INTO Score (username, score) VALUES(?, ?)"
+        return bool(self.execute_command(command, (username, score)))
+
+    def remove_score(self, username: str) -> bool:
+        """Remove a score in the Score table."""
+
+        command = "DELETE FROM Score WHERE username = ?"
+        return bool(self.execute_command(command, (username,)))
+
+
+class Quiz(Database):
+    """Class that handles interactions with the Quizzes in the QUiz table."""
+
+    def __init__(self):
+        super().__init__()
+
+        command = """CREATE TABLE IF NOT EXISTS Quiz (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                question TEXT NON NULL,
+                answer TEXT NON NULL,
+                lesson TEXT NON NULL)"""
+        super().execute_command(command)
+
+    def add_quiz(self, question: str, answer: str, lesson: str) -> bool:
+        """Add a quiz in the Quiz table."""
+
+        command = "INSERT INTO Quiz (question, answer, lesson) VALUES(?, ?, ?)"
+        return bool(self.execute_command(command, (question, answer, lesson)))
+
+    def remove_quiz(self, id: int) -> bool:
+        """Remove a quiz in the Quiz table."""
+
+        command = "DELETE FROM Quiz WHERE id = ?"
+        return bool(self.execute_command(command, (id,)))
+
