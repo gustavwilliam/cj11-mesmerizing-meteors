@@ -10,7 +10,7 @@ class Database:
     def __init__(self) -> None:
 
         # Default name of the database
-        self.name = PATH.joinpath("sto.db")
+        self.name = PATH.joinpath(".store.db")
 
         # Connection to the database
         self.__connection = sqlite3.connect(self.name)
@@ -64,16 +64,20 @@ class Quiz(Database):
 
         command = """CREATE TABLE IF NOT EXISTS Quiz (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                level INTEGER NON NULL,
                 question TEXT NON NULL,
                 answer TEXT NON NULL,
                 lesson TEXT NON NULL)"""
         super().execute_command(command)
 
-    def add_quiz(self, question: str, answer: str, lesson: str) -> bool:
+    def add_quiz(self, level: int, question: str,
+                 answer: str, lesson: str) -> bool:
         """Add a quiz in the Quiz table."""
 
-        command = "INSERT INTO Quiz (question, answer, lesson) VALUES(?, ?, ?)"
-        return bool(self.execute_command(command, (question, answer, lesson)))
+        command = """INSERT INTO Quiz (level, question, answer, lesson)
+        VALUES(?, ?, ?, ?)"""
+        return bool(self.execute_command(
+            command, (level, question, answer, lesson)))
 
     def remove_quiz(self, id: int) -> bool:
         """Remove a quiz in the Quiz table."""
