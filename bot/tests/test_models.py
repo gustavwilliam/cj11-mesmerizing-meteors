@@ -1,7 +1,7 @@
 import unittest
 
-from bot.database.database import Score
-from bot.database.models import Score, ScoreSheet
+from database.database import Score
+from database.models import Score, ScoreSheet
 
 
 class TestDB:
