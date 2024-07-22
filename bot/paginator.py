@@ -47,4 +47,3 @@ class Paginator(discord.ui.View):
         self.turn_page()
 
         await interaction.response.edit_message(embed=self.pages[self.current_page], view=self)
-
