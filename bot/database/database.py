@@ -11,7 +11,7 @@ class Database:
 
     __table_name__ = None
 
-    def __init__(self, name: str | None = None) -> None:
+    def __init__(self, name:str|None = None) -> None:
         # Default name of the database
         self.name = name or PATH.joinpath(".store.db")
 
@@ -101,29 +101,3 @@ class Score(Database):
                 (level,),
             )
             return cursor.fetchall()
-
-
-class Quiz(Database):
-    """Class that handles interactions with the Quizzes in the QUiz table."""
-
-    def __init__(self) -> None:
-        super().__init__()
-
-        command = """CREATE TABLE IF NOT EXISTS Quiz (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                level INTEGER NON NULL,
-                question TEXT NON NULL,
-                answer TEXT NON NULL,
-                lesson TEXT NON NULL)"""
-        super().execute_command(command)
-
-    def add_quiz(self, level: int, question: str, answer: str, lesson: str) -> bool:
-        """Add a quiz in the Quiz table."""
-        command = """INSERT INTO Quiz (level, question, answer, lesson)
-        VALUES(?, ?, ?, ?)"""
-        return bool(self.execute_command(command, (level, question, answer, lesson)))
-
-    def remove_quiz(self, id: int) -> bool:
-        """Remove a quiz in the Quiz table."""
-        command = "DELETE FROM Quiz WHERE id = ?"
-        return bool(self.execute_command(command, (id,)))
