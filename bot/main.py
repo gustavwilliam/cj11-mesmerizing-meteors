@@ -41,11 +41,11 @@ async def embed_command(interaction: discord.Interaction) -> None:
 
 
 @bot.tree.command(name="map", description="Send a part of the game's map")
-async def get_map(interaction: discord.Interaction, position: MapPosition) -> None:
+async def get_map(interaction: discord.Interaction, x: int, y: int, z: int) -> None:
     """Send a part of the game's map, centered on the given position."""
     await interaction.response.defer(thinking=True)
-    img = image_to_discord_file(generate_map(position), image_name := "image")
-    embed = discord.Embed(title=f"Map at {position.name}")
+    img = image_to_discord_file(generate_map((x, y, z)), image_name := "image")
+    embed = discord.Embed(title=f"Map at {x}, {y}, {z}")
     embed.set_image(url=f"attachment://{image_name}.png")
     await interaction.followup.send(file=img, embed=embed)
 
