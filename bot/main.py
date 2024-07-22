@@ -53,6 +53,7 @@ async def get_map(interaction: discord.Interaction, x: int = 0, y: int = 0) -> N
     embed = discord.Embed(
         title=f"\U0001f5fa {interaction.user.display_name}'s map",
         description="Press the arrow keys to move around.",
+        color=discord.Color.blurple(),
     )
     embed.set_image(url=f"attachment://{image_name}.png")
     await interaction.response.send_message(file=img, embed=embed, view=Map((x, y), interaction.user))

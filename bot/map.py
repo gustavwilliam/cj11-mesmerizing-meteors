@@ -122,6 +122,7 @@ class Map(discord.ui.View):
         """Update map to the new position."""
         embed = discord.Embed(
             title=f"\U0001f5fa {self.user.display_name}'s Map",
+            color=discord.Color.blurple(),
         )
         embed.description = get_embed_description(self.position)
         img = image_to_discord_file(
@@ -141,6 +142,7 @@ class Map(discord.ui.View):
         emoji=discord.PartialEmoji.from_str("<:arrowleft:1265077268951339081>"),
         style=discord.ButtonStyle.primary,
         custom_id="button_left",
+        row=2,
     )
     async def button_left_clicked(
         self,
@@ -149,19 +151,6 @@ class Map(discord.ui.View):
     ) -> None:
         """Go left on the map."""
         await self.move(interaction, x=-1)
-
-    @discord.ui.button(
-        emoji=discord.PartialEmoji.from_str("<:arrowright:1265077270515552339>"),
-        style=discord.ButtonStyle.primary,
-        custom_id="button_right",
-    )
-    async def button_right_clicked(
-        self,
-        interaction: discord.Interaction,
-        _: discord.ui.Button,
-    ) -> None:
-        """Go right on the map."""
-        await self.move(interaction, x=1)
 
     @discord.ui.button(
         emoji=discord.PartialEmoji.from_str("<:arrowup:1265077271970975874>"),
@@ -177,9 +166,23 @@ class Map(discord.ui.View):
         await self.move(interaction, y=-1)
 
     @discord.ui.button(
+        emoji=discord.PartialEmoji.from_str("<:arrowright:1265077270515552339>"),
+        style=discord.ButtonStyle.primary,
+        custom_id="button_right",
+    )
+    async def button_right_clicked(
+        self,
+        interaction: discord.Interaction,
+        _: discord.ui.Button,
+    ) -> None:
+        """Go right on the map."""
+        await self.move(interaction, x=1)
+
+    @discord.ui.button(
         emoji=discord.PartialEmoji.from_str("<:arrowdown:1265077267965673587>"),
         style=discord.ButtonStyle.primary,
         custom_id="button_down",
+        row=2,
     )
     async def button_down_clicked(
         self,
