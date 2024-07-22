@@ -3,7 +3,7 @@ from os import getenv
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
-from map import MapPosition, generate_map, image_to_discord_file
+from map import Map, generate_map, image_to_discord_file
 from paginator import Paginator
 
 load_dotenv()
@@ -43,11 +43,13 @@ async def embed_command(interaction: discord.Interaction) -> None:
 @bot.tree.command(name="map", description="Send a part of the game's map")
 async def get_map(interaction: discord.Interaction, x: int, y: int, z: int) -> None:
     """Send a part of the game's map, centered on the given position."""
-    await interaction.response.defer(thinking=True)
-    img = image_to_discord_file(generate_map((x, y, z)), image_name := "image")
-    embed = discord.Embed(title=f"Map at {x}, {y}, {z}")
+    img = image_to_discord_file(generate_map((x, y)), image_name := "image")
+    embed = discord.Embed(
+        title=f"\U0001F5FA {interaction.user.display_name}'s map",
+        description=f"Map position: {x}, {y}, {z}",
+    )
     embed.set_image(url=f"attachment://{image_name}.png")
-    await interaction.followup.send(file=img, embed=embed)
+    await interaction.response.send_message(file=img, embed=embed, view=Map((x, y)))
 
 
 # Bot ready message
