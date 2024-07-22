@@ -4,11 +4,13 @@ from enum import Enum
 from pathlib import Path
 
 import discord
-from PIL import Image
+from matplotlib import font_manager
+from PIL import Image, ImageDraw, ImageFont
 
 path_bot = Path("bot")
 path_assets = path_bot / "assets"
 path_maps = path_assets / "map"
+path_font = font_manager.findfont(font_manager.FontProperties(family="sans-serif", weight="normal"))
 
 CAMERA_H = 400
 CAMERA_W = 600
@@ -54,12 +56,26 @@ def validate_coord(coord: tuple[int, int]) -> bool:
     return not (map_z.get(str(coord[0])) is None or map_z[str(coord[0])].get(str(coord[1])) is None)
 
 
+def is_level(coord: tuple[int, int]) -> bool:
+    """Check if the given coordinate is a level."""
+    return coord in [pos.value for pos in MapPosition]
+
+
+def get_embed_description(position: tuple[int, int]) -> str:
+    """Get a descripton of the map at the given position."""
+    for key, value in MapPosition.__members__.items():
+        if value.value == position:
+            return f"Hovering: {key}\n**Press <:check:1265079659448766506> to start level.**"
+    return "Press the arrow keys to move around."
+
+
 class Map(discord.ui.View):
     """Allows the user to navigate the map."""
 
-    def __init__(self, position: tuple[int, int]) -> None:
+    def __init__(self, position: tuple[int, int], user: discord.User | discord.Member) -> None:
         super().__init__(timeout=180)
         self.position = position
+        self.user = user
 
     async def move(
         self,
@@ -96,14 +112,22 @@ class Map(discord.ui.View):
                 child.disabled = should_disable(x, y + 1)
             if child.custom_id == "button_right":
                 child.disabled = should_disable(x + 1, y)
+            if child.custom_id == "button_confirm":
+                child.disabled = not is_level(self.position)
 
     async def navigate(
         self,
         interaction: discord.Interaction,
     ) -> None:
         """Update map to the new position."""
-        embed = discord.Embed()
-        img = image_to_discord_file(generate_map(self.position), image_name := "image")
+        embed = discord.Embed(
+            title=f"\U0001f5fa {self.user.display_name}'s Map",
+        )
+        embed.description = get_embed_description(self.position)
+        img = image_to_discord_file(
+            generate_map(self.position, player_name=self.user.display_name),
+            image_name := "image",
+        )
         embed.set_image(url=f"attachment://{image_name}.png")
         self.update_buttons()
 
@@ -114,7 +138,7 @@ class Map(discord.ui.View):
         )
 
     @discord.ui.button(
-        label="◀",
+        emoji=discord.PartialEmoji.from_str("<:arrowleft:1265077268951339081>"),
         style=discord.ButtonStyle.primary,
         custom_id="button_left",
     )
@@ -127,7 +151,20 @@ class Map(discord.ui.View):
         await self.move(interaction, x=-1)
 
     @discord.ui.button(
-        label="▲",
+        emoji=discord.PartialEmoji.from_str("<:arrowright:1265077270515552339>"),
+        style=discord.ButtonStyle.primary,
+        custom_id="button_right",
+    )
+    async def button_right_clicked(
+        self,
+        interaction: discord.Interaction,
+        _: discord.ui.Button,
+    ) -> None:
+        """Go right on the map."""
+        await self.move(interaction, x=1)
+
+    @discord.ui.button(
+        emoji=discord.PartialEmoji.from_str("<:arrowup:1265077271970975874>"),
         style=discord.ButtonStyle.primary,
         custom_id="button_up",
     )
@@ -140,7 +177,7 @@ class Map(discord.ui.View):
         await self.move(interaction, y=-1)
 
     @discord.ui.button(
-        label="▼",
+        emoji=discord.PartialEmoji.from_str("<:arrowdown:1265077267965673587>"),
         style=discord.ButtonStyle.primary,
         custom_id="button_down",
     )
@@ -153,17 +190,18 @@ class Map(discord.ui.View):
         await self.move(interaction, y=1)
 
     @discord.ui.button(
-        label="►",
-        style=discord.ButtonStyle.primary,
-        custom_id="button_right",
+        emoji=discord.PartialEmoji.from_str("<:check:1265079659448766506>"),
+        style=discord.ButtonStyle.success,
+        custom_id="button_confirm",
+        disabled=True,
     )
-    async def button_right_clicked(
+    async def confirm(
         self,
         interaction: discord.Interaction,
         _: discord.ui.Button,
     ) -> None:
-        """Go right on the map."""
-        await self.move(interaction, x=1)
+        """Confirm/select on the map."""
+        await interaction.response.send_message("Confirmed/selected.", ephemeral=True)
 
 
 def get_camera_box(
@@ -212,7 +250,70 @@ def _crop_map(
     return img.crop(box)
 
 
-def generate_map(position: tuple[int, int], *, with_player: bool = True) -> Image.Image:
+def draw_player(position: tuple[int, int]) -> tuple[Image.Image, int]:
+    """Draw the player on the map centered on the given position.
+
+    Returns the map with the player on it and the player's height.
+    """
+    player = Image.open(path_assets / "player.png").convert("RGBA")
+    player_w, player_h = player.size
+    offset = (0, round(-player_h / 2))
+    bg = _crop_map(position, offset=offset).convert("RGBA")
+    bg.paste(
+        player,
+        (
+            round(CAMERA_W / 2 - player_w / 2),
+            round(CAMERA_H / 2 - player_h / 2),
+        ),
+        player,
+    )
+    return bg, player_h
+
+
+def draw_name_box(bg: Image.Image, player_name: str, player_h: int) -> None:
+    """Draw a name box with the player's name on the map."""
+    name_box = Image.open(path_assets / "name-box.png").convert("RGBA")
+    name_box_w, name_box_h = name_box.size
+    bg.paste(
+        name_box,
+        (
+            round(CAMERA_W / 2 - name_box_w / 2),
+            round(CAMERA_H / 2 - player_h / 2 - 40),
+        ),
+        name_box,
+    )
+    draw = ImageDraw.Draw(bg)
+
+    fontsize = 24
+    font = ImageFont.truetype(path_font, fontsize)
+    while font.getlength(player_name) > name_box_w - 10:
+        # Decrease font size until the text fits in the box
+        fontsize -= 1
+        font = ImageFont.truetype(path_font, fontsize)
+    left, top, _, bottom = draw.textbbox(
+        (
+            round(CAMERA_W / 2),
+            round(CAMERA_H / 2 - player_h / 2 - 40),
+        ),
+        player_name,
+        font=font,
+        align="center",
+        anchor="mm",
+    )
+    draw.text(
+        (left, top + name_box_h / 2 - (bottom - top) / 2),
+        player_name,
+        font=font,
+        fill="black",
+    )
+
+
+def generate_map(
+    position: tuple[int, int],
+    *,
+    with_player: bool = True,
+    player_name: str | None = None,
+) -> Image.Image:
     """Generate a map centered on the provided map coordinate.
 
     The map coordinate is not in pixels but in the map's coordinate system.
@@ -224,17 +325,10 @@ def generate_map(position: tuple[int, int], *, with_player: bool = True) -> Imag
     """
     if not with_player:
         return _crop_map(position)
+    bg, player_h = draw_player(position)
 
-    player = Image.open(path_assets / "player.png").convert("RGBA")
-    player_h, player_w = player.size
-    offset = (0, round(-player_h / 2))
-    bg = _crop_map(position, offset=offset).convert("RGBA")
-    bg.paste(
-        player,
-        (
-            round(CAMERA_W / 2 - player_w / 2),
-            round(CAMERA_H / 2 - player_h / 2),
-        ),
-        player,
-    )
+    if player_name is None:
+        return bg
+    draw_name_box(bg, player_name, player_h)
+
     return bg
