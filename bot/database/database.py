@@ -11,7 +11,7 @@ class Database:
 
     __table_name__ = None
 
-    def __init__(self, name:str|None = None) -> None:
+    def __init__(self, name: str | None = None) -> None:
         # Default name of the database
         self.name = name or PATH.joinpath(".store.db")
 
