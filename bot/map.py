@@ -1,9 +1,6 @@
-from code import interact
-from dis import disco
-from hmac import new
 import io
-from enum import Enum
 import json
+from enum import Enum
 from pathlib import Path
 
 import discord
@@ -21,7 +18,7 @@ SquareDeltaY = (111.3, 52)  # Pixels travelled when moving Y on map
 SquareDeltaZ = (0, -105)  # Pixels travelled when moving Z on map
 
 
-with open(path_bot / "map_z.json") as f:
+with Path.open(path_bot / "map_z.json") as f:
     map_z = json.load(f)
 
 
@@ -54,10 +51,7 @@ class MapPosition(Enum):
 
 def validate_coord(coord: tuple[int, int]) -> bool:
     """Raise an error if the coordinate is not in the map."""
-    return not (
-        map_z.get(str(coord[0])) is None
-        or map_z[str(coord[0])].get(str(coord[1])) is None
-    )
+    return not (map_z.get(str(coord[0])) is None or map_z[str(coord[0])].get(str(coord[1])) is None)
 
 
 class Map(discord.ui.View):
@@ -68,7 +62,10 @@ class Map(discord.ui.View):
         self.position = position
 
     async def move(
-        self, interaction: discord.Interaction, x: int = 0, y: int = 0
+        self,
+        interaction: discord.Interaction,
+        x: int = 0,
+        y: int = 0,
     ) -> None:
         """Move the player to the new position."""
         old_x, old_y = self.position
@@ -81,7 +78,7 @@ class Map(discord.ui.View):
         # happen if the user somehow manages to click the button before it
         # has a chance to be disabled. In that case, we just ignore the click.
 
-    def update_buttons(self):
+    def update_buttons(self) -> None:
         """Update the buttons to match the current position."""
 
         def should_disable(x: int, y: int) -> bool:
@@ -104,14 +101,16 @@ class Map(discord.ui.View):
         self,
         interaction: discord.Interaction,
     ) -> None:
-        """Updates map to the new position."""
+        """Update map to the new position."""
         embed = discord.Embed()
         img = image_to_discord_file(generate_map(self.position), image_name := "image")
         embed.set_image(url=f"attachment://{image_name}.png")
         self.update_buttons()
 
         await interaction.response.edit_message(
-            embed=embed, attachments=[img], view=self
+            embed=embed,
+            attachments=[img],
+            view=self,
         )
 
     @discord.ui.button(
@@ -120,7 +119,9 @@ class Map(discord.ui.View):
         custom_id="button_left",
     )
     async def button_left_clicked(
-        self, interaction: discord.Interaction, _: discord.ui.Button
+        self,
+        interaction: discord.Interaction,
+        _: discord.ui.Button,
     ) -> None:
         """Go left on the map."""
         await self.move(interaction, x=-1)
@@ -131,7 +132,9 @@ class Map(discord.ui.View):
         custom_id="button_up",
     )
     async def button_up_clicked(
-        self, interaction: discord.Interaction, _: discord.ui.Button
+        self,
+        interaction: discord.Interaction,
+        _: discord.ui.Button,
     ) -> None:
         """Go up on the map."""
         await self.move(interaction, y=-1)
@@ -142,7 +145,9 @@ class Map(discord.ui.View):
         custom_id="button_down",
     )
     async def button_down_clicked(
-        self, interaction: discord.Interaction, _: discord.ui.Button
+        self,
+        interaction: discord.Interaction,
+        _: discord.ui.Button,
     ) -> None:
         """Go down on the map."""
         await self.move(interaction, y=1)
@@ -153,45 +158,29 @@ class Map(discord.ui.View):
         custom_id="button_right",
     )
     async def button_right_clicked(
-        self, interaction: discord.Interaction, _: discord.ui.Button
+        self,
+        interaction: discord.Interaction,
+        _: discord.ui.Button,
     ) -> None:
         """Go right on the map."""
         await self.move(interaction, x=1)
-
-    @discord.ui.button(
-        label="✅", style=discord.ButtonStyle.success, custom_id="confirm"
-    )
-    async def confirm_page(
-        self, interaction: discord.Interaction, _: discord.ui.Button
-    ) -> None:
-        """Confirm the action on the current page."""
-        self.clear_items()
 
 
 def get_camera_box(
     position: tuple[int, int],
     offset: tuple[int, int] = (0, 0),
 ) -> tuple[int, int, int, int]:
-    """
-    Get the camera box for the map.
+    """Get the camera box for the map.
 
     offset is specified in pixels.
     """
     x, y = position
     z = map_z[str(x)][str(y)]
     pos_x = round(
-        SquareOrigo[0]
-        + x * SquareDeltaX[0]
-        + y * SquareDeltaY[0]
-        + z * SquareDeltaZ[0]
-        + offset[0]
+        SquareOrigo[0] + x * SquareDeltaX[0] + y * SquareDeltaY[0] + z * SquareDeltaZ[0] + offset[0],
     )
     pos_y = round(
-        SquareOrigo[1]
-        + x * SquareDeltaX[1]
-        + y * SquareDeltaY[1]
-        + z * SquareDeltaZ[1]
-        + offset[1]
+        SquareOrigo[1] + x * SquareDeltaX[1] + y * SquareDeltaY[1] + z * SquareDeltaZ[1] + offset[1],
     )
     return (
         pos_x - round(CAMERA_W / 2),

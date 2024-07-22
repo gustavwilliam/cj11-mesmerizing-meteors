@@ -45,7 +45,7 @@ async def get_map(interaction: discord.Interaction, x: int, y: int, z: int) -> N
     """Send a part of the game's map, centered on the given position."""
     img = image_to_discord_file(generate_map((x, y)), image_name := "image")
     embed = discord.Embed(
-        title=f"\U0001F5FA {interaction.user.display_name}'s map",
+        title=f"\U0001f5fa {interaction.user.display_name}'s map",
         description=f"Map position: {x}, {y}, {z}",
     )
     embed.set_image(url=f"attachment://{image_name}.png")
