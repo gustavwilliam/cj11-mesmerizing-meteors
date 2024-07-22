@@ -42,3 +42,7 @@ ignore = [
     "ANN101",
     "ANN102",
 ]
+
+# Ignore assert error for tests
+[tool.ruff.lint.per-file-ignores]
+"bot/tests/*.py" = ["S101"]
