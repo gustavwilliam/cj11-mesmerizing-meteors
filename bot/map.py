@@ -56,6 +56,19 @@ def validate_coord(coord: tuple[int, int]) -> bool:
     return not (map_z.get(str(coord[0])) is None or map_z[str(coord[0])].get(str(coord[1])) is None)
 
 
+def is_level(coord: tuple[int, int]) -> bool:
+    """Check if the given coordinate is a level."""
+    return coord in [pos.value for pos in MapPosition]
+
+
+def get_embed_description(position: tuple[int, int]) -> str:
+    """Get a descripton of the map at the given position."""
+    for key, value in MapPosition.__members__.items():
+        if value.value == position:
+            return f"Hovering: {key}\n**Press <:check:1265079659448766506> to start level.**"
+    return "Press the arrow keys to move around."
+
+
 class Map(discord.ui.View):
     """Allows the user to navigate the map."""
 
@@ -99,13 +112,18 @@ class Map(discord.ui.View):
                 child.disabled = should_disable(x, y + 1)
             if child.custom_id == "button_right":
                 child.disabled = should_disable(x + 1, y)
+            if child.custom_id == "button_confirm":
+                child.disabled = not is_level(self.position)
 
     async def navigate(
         self,
         interaction: discord.Interaction,
     ) -> None:
         """Update map to the new position."""
-        embed = discord.Embed()
+        embed = discord.Embed(
+            title=f"\U0001f5fa {self.user.display_name}'s Map",
+        )
+        embed.description = get_embed_description(self.position)
         img = image_to_discord_file(
             generate_map(self.position, player_name=self.user.display_name),
             image_name := "image",
@@ -120,7 +138,7 @@ class Map(discord.ui.View):
         )
 
     @discord.ui.button(
-        label="◀",
+        emoji=discord.PartialEmoji.from_str("<:arrowleft:1265077268951339081>"),
         style=discord.ButtonStyle.primary,
         custom_id="button_left",
     )
@@ -133,7 +151,20 @@ class Map(discord.ui.View):
         await self.move(interaction, x=-1)
 
     @discord.ui.button(
-        label="▲",
+        emoji=discord.PartialEmoji.from_str("<:arrowright:1265077270515552339>"),
+        style=discord.ButtonStyle.primary,
+        custom_id="button_right",
+    )
+    async def button_right_clicked(
+        self,
+        interaction: discord.Interaction,
+        _: discord.ui.Button,
+    ) -> None:
+        """Go right on the map."""
+        await self.move(interaction, x=1)
+
+    @discord.ui.button(
+        emoji=discord.PartialEmoji.from_str("<:arrowup:1265077271970975874>"),
         style=discord.ButtonStyle.primary,
         custom_id="button_up",
     )
@@ -146,7 +177,7 @@ class Map(discord.ui.View):
         await self.move(interaction, y=-1)
 
     @discord.ui.button(
-        label="▼",
+        emoji=discord.PartialEmoji.from_str("<:arrowdown:1265077267965673587>"),
         style=discord.ButtonStyle.primary,
         custom_id="button_down",
     )
@@ -159,17 +190,18 @@ class Map(discord.ui.View):
         await self.move(interaction, y=1)
 
     @discord.ui.button(
-        label="►",
-        style=discord.ButtonStyle.primary,
-        custom_id="button_right",
+        emoji=discord.PartialEmoji.from_str("<:check:1265079659448766506>"),
+        style=discord.ButtonStyle.success,
+        custom_id="button_confirm",
+        disabled=True,
     )
-    async def button_right_clicked(
+    async def confirm(
         self,
         interaction: discord.Interaction,
         _: discord.ui.Button,
     ) -> None:
-        """Go right on the map."""
-        await self.move(interaction, x=1)
+        """Confirm/select on the map."""
+        await interaction.response.send_message("Confirmed/selected.", ephemeral=True)
 
 
 def get_camera_box(
