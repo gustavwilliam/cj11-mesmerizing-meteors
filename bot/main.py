@@ -3,6 +3,7 @@ from os import getenv
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
+from map import MapPosition, generate_map, image_to_discord_file
 from paginator import Paginator
 
 load_dotenv()
@@ -39,6 +40,16 @@ async def embed_command(interaction: discord.Interaction) -> None:
     await interaction.response.send_message(embed=pages[0], view=paginator)
 
 
+@bot.tree.command(name="map", description="Send a part of the game's map")
+async def get_map(interaction: discord.Interaction, position: MapPosition) -> None:
+    """Send a part of the game's map, centered on the given position."""
+    await interaction.response.defer(thinking=True)
+    img = image_to_discord_file(generate_map(position), image_name := "image")
+    embed = discord.Embed(title=f"Map at {position.name}")
+    embed.set_image(url=f"attachment://{image_name}.png")
+    await interaction.followup.send(file=img, embed=embed)
+
+
 # Bot ready message
 @bot.event
 async def on_ready() -> None:
@@ -53,4 +64,3 @@ async def on_ready() -> None:
 
 # Start the bot
 bot.run(getenv("DISCORD_BOT_KEY"))
-
