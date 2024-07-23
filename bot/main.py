@@ -1,10 +1,12 @@
 from os import getenv
 
+import async_tio
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 from map import Map, generate_map, image_to_discord_file
 from paginator import Paginator
+from utils.eval import eval_python
 
 load_dotenv()
 
@@ -57,6 +59,27 @@ async def get_map(interaction: discord.Interaction, x: int = 0, y: int = 0) -> N
     )
     embed.set_image(url=f"attachment://{image_name}.png")
     await interaction.response.send_message(file=img, embed=embed, view=Map((x, y), interaction.user))
+
+
+@bot.tree.command(name="eval", description="Evaluate Python code")
+async def eval_code(interaction: discord.Interaction, code: str) -> None:
+    """Evaluate Python code and return the output."""
+    await interaction.response.defer()
+    try:
+        output = await eval_python(code)
+        output = (
+            ":white_check_mark: Your Python 3 eval job succeeded.\n\n**Output**\n```py\n" + output[:2000] + "\n```"
+        )
+    except async_tio.ApiError as e:
+        print("Tio API error: ", e)
+        output = ":cross: An API error occured while running your code. Please try again later."
+    await interaction.followup.send(
+        embed=discord.Embed(
+            title="Eval result",
+            description=output,
+            color=discord.Color.blurple(),
+        ),
+    )
 
 
 # Bot ready message
