@@ -1,0 +1,100 @@
+{
+    "questions": [
+      {
+        "type": "list_comprehension",
+        "difficulty": "easy",
+        "question": "What will be the output of the following code?\n\n```python\nnums = [1, 2, 3, 4, 5]\ndoubled_nums = [num * 2 for num in nums]\nprint(doubled_nums)\n```\n",
+        "choices": {
+          "a": "[2, 4, 6, 8, 10]",
+          "b": "[1, 4, 9, 16, 25]",
+          "c": "[2, 3, 4, 5, 6]"
+        },
+        "answer": "a"
+      },
+      {
+        "type": "list_comprehension",
+        "difficulty": "easy",
+        "question": "Write a list comprehension that squares all numbers in the list `numbers = [1, 2, 3, 4, 5]` and stores them in a list called `squares`.",
+        "answer_code": "squares = [num ** 2 for num in numbers]"
+      },
+      {
+        "type": "list_comprehension",
+        "difficulty": "medium",
+        "question": "What will be the output of the following list comprehension?\n\n```python\nnumbers = [1, 2, 3, 4, 5]\nsquares = [x ** 2 for x in numbers if x % 2 == 0]\nprint(squares)\n```\n",
+        "choices": {
+          "a": "[4, 16]",
+          "b": "[1, 4, 9, 16, 25]",
+          "c": "[1, 9, 25]"
+        },
+        "answer": "a"
+      },
+      {
+        "type": "generators",
+        "difficulty": "easy",
+        "question": "Write a generator function `even_numbers` that generates even numbers starting from 2 up to a given limit `n`.",
+        "answer_code": "def even_numbers(n):\n    num = 2\n    while num <= n:\n        yield num\n        num += 2"
+      },
+      {
+        "type": "generators",
+        "difficulty": "medium",
+        "question": "What will be the output of the following code snippet?\n\n```python\ndef fibonacci_generator():\n    a, b = 0, 1\n    while True:\n        yield a\n        a, b = b, a + b\n\nfib_gen = fibonacci_generator()\nfib_sequence = [next(fib_gen) for _ in range(5)]\nprint(fib_sequence)\n```\n",
+        "choices": {
+          "a": "[0, 1, 1, 2, 3]",
+          "b": "[1, 1, 2, 3, 5]",
+          "c": "[0, 1, 2, 3, 4]"
+        },
+        "answer": "a"
+      },
+      {
+        "type": "iterators",
+        "difficulty": "easy",
+        "question": "What is the purpose of an iterator in Python?",
+        "choices": {
+          "a": "To generate random numbers.",
+          "b": "To iterate over items in a sequence or collection.",
+          "c": "To create new objects from existing ones."
+        },
+        "answer": "b"
+      },
+      {
+        "type": "iterators",
+        "difficulty": "medium",
+        "question": "Write an iterator class `Countdown` that iterates from a given start number down to 1.",
+        "answer_code": "class Countdown:\n    def __init__(self, start):\n        self.start = start\n\n    def __iter__(self):\n        return self\n\n    def __next__(self):\n        if self.start <= 0:\n            raise StopIteration\n        else:\n            self.start -= 1\n            return self.start + 1"
+      },
+      {
+        "type": "iterators",
+        "difficulty": "hard",
+        "question": "Consider the following iterator implementation:\n\n```python\nclass Countdown:\n    def __init__(self, start):\n        self.start = start\n\n    def __iter__(self):\n        return self\n\n    def __next__(self):\n        if self.start <= 0:\n            raise StopIteration\n        else:\n            self.start -= 1\n            return self.start + 1\n\ncountdown = Countdown(3)\nprint(list(countdown))\n```\n\nWhat will be the output of the code snippet?",
+        "choices": {
+          "a": "[3, 2, 1]",
+          "b": "[1, 2, 3]",
+          "c": "[0, 1, 2]"
+        },
+        "answer": "a"
+      },
+      {
+        "type": "function_overloading",
+        "difficulty": "medium",
+        "question": "Does Python support function overloading by default (like in languages such as C++)?",
+        "choices": {
+          "a": "Yes",
+          "b": "No",
+          "c": "It depends on the version of Python used"
+        },
+        "answer": "b"
+      },
+      {
+        "type": "function_overloading",
+        "difficulty": "hard",
+        "question": "Implement a function `multiply` that can take either two or three arguments. If two arguments are provided, it should return their product. If three arguments are provided, it should return their product plus the third argument.",
+        "answer_code": "def multiply(a, b, c=None):\n    if c is not None:\n        return a * b * c\n    else:\n        return a * b"
+      },
+      {
+        "type": "function_overloading",
+        "difficulty": "hard",
+        "question": "Consider the following Python code:\n\n```python\ndef add(a, b):\n    return a + b\n\ndef add(a, b, c):\n    return a + b + c\n\nprint(add(1, 2))\n```\n\nWhat will be the output of this code?",
+        "answer": "c"
+      }
+    ]
+  }
