@@ -70,10 +70,26 @@ class Level1(Level):  # noqa: D101
     topic = "List Comprehensions"
     map_position = (1, 0)
 
-    def run(self) -> None:  # noqa: D102
-        print("Running level 1 -- Here are the questions:")
-        for question in self.questions:
-            print(question)
+
+class Level2(Level):  # noqa: D101
+    id = 2
+    name = "Level 2"
+    topic = "Generators"
+    map_position = (3, 0)
+
+
+class Level3(Level):  # noqa: D101
+    id = 3
+    name = "Level 3"
+    topic = "Iterator"
+    map_position = (5, 0)
+
+
+class Level4(Level):  # noqa: D101
+    id = 4
+    name = "Level 4"
+    topic = "Function overloading"
+    map_position = (8, 0)
 
 
 # Other levels will be defined here, following the same pattern as Level1
