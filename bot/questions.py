@@ -44,7 +44,7 @@ class Question(Protocol):
         return self.question
 
     @abstractmethod
-    def check_response(self, response: str) -> bool:
+    async def check_response(self, response: str) -> bool:
         """Check if the answer is correct."""
         raise NotImplementedError
 
@@ -77,7 +77,7 @@ class MultipleChoiceQuestion(Question):
         self.options = options
         self.answer = answer
 
-    def check_response(self, response: str) -> bool:  # noqa: D102
+    async def check_response(self, response: str) -> bool:  # noqa: D102
         return response == self.answer
 
 
@@ -101,7 +101,7 @@ class WriteCodeQuestion(Question):
     named `add`. If the function is not named correctly, the tests will fail.
     """
 
-    def __init__(self, question: str, hints: list[str], test_cases: list[tuple[str, str]]) -> None:
+    def __init__(self, question: str, hints: list[str], test_cases: list[dict[str, str]]) -> None:
         self.type = "write_code"
         self.question = question
         self.hints = hints
@@ -141,7 +141,11 @@ class WriteCodeQuestion(Question):
         to debug. However, since the code is running in a sandboxed environment, this method of generating tests
         poses no security risk.
         """
-        test_strings = [self._get_assert_equal_string(*test_case) for test_case in self.test_cases]
+        test_strings = []
+        for test_case in self.test_cases:
+            input = test_case["input"]
+            output = test_case["output"]
+            test_strings.append(self._get_assert_equal_string(input, output))
         return (
             "import unittest\n"  # Import unittest module
             + user_code.expandtabs(2)  # Insert user code. Tabs -> spaces for consistency with test code
