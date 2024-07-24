@@ -1,5 +1,4 @@
 import json
-from abc import abstractmethod
 from pathlib import Path
 from typing import Protocol
 
@@ -14,6 +13,8 @@ class Level(Protocol):
     """Protocol that all levels must implement.
 
     Different level types can be created by subclassing this protocol.
+    All levels must run `Level.register()` to register the level class with the controller.
+    This should happen at startup.
 
     Instances of the levels that subclass this protocol are created
     when a level is run. The data for the level is stored in the instance,
@@ -22,17 +23,19 @@ class Level(Protocol):
     should be stored in a different place.
     """
 
-    controller: Controller
     id: int
     name: str
     topic: str
     map_position: tuple[int, int]
     questions: list[Question]
 
-    def __init__(self, controller: Controller) -> None:
-        """Register the level to the controller."""
-        self.controller = controller
-        self.controller.add_level(self)
+    @classmethod
+    def register(cls) -> None:
+        """Register a Level class with the controller."""
+        Controller().add_level(cls)
+
+    def __init__(self) -> None:
+        """Fetch the data for the level."""
         self.fetch_level_data()
 
     def __str__(self) -> str:
@@ -50,10 +53,8 @@ class Level(Protocol):
             raise ValueError("No questions found for level " + str(self.id))
         self.questions = [question_factory(**question_data) for question_data in questions]
 
-    @abstractmethod
     def run(self) -> None:
         """Run the level."""
-        raise NotImplementedError
 
     def on_failure(self) -> None:
         """Call when the player fails the level."""
@@ -92,4 +93,9 @@ class Level4(Level):  # noqa: D101
     map_position = (8, 0)
 
 
-# Other levels will be defined here, following the same pattern as Level1
+def register_all_levels() -> None:
+    """Register all levels with the controller."""
+    Level1.register()
+    Level2.register()
+    Level3.register()
+    Level4.register()

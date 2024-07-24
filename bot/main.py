@@ -2,8 +2,10 @@ from os import getenv
 
 import async_tio
 import discord
+from controller import Controller
 from discord.ext import commands
 from dotenv import load_dotenv
+from levels import register_all_levels
 from map import Map, generate_map, image_to_discord_file
 from paginator import Paginator
 from utils.eval import eval_python
@@ -92,6 +94,9 @@ async def on_ready() -> None:
         print(f"{len(synced)} commands synchronized")
     except discord.DiscordException as e:
         print(f"Err: {e}")
+
+    register_all_levels()
+    print("Loaded levels:", ", ".join(str(level.id) for level in Controller().levels))
 
 
 # Start the bot
