@@ -1,0 +1,179 @@
+{
+  "1": [
+    {
+      "type": "multiple_choice",
+      "question": "What will be the output of the following code?\n\n```python\nnums = [1, 2, 3, 4, 5]\ndoubled_nums = [num * 2 for num in nums]\nprint(doubled_nums)\n```\n",
+      "hints": [
+        "The code uses a list comprehension to double each number in the list `nums`."
+      ],
+      "options": {
+        "a": "[2, 4, 6, 8, 10]",
+        "b": "[1, 4, 9, 16, 25]",
+        "c": "[2, 3, 4, 5, 6]"
+      },
+      "answer": "a"
+    },
+    {
+      "type": "write_code",
+      "question": "Write a list comprehension that squares all numbers in the list `numbers = [1, 2, 3, 4, 5]` and stores the result in a list called `squares`.",
+      "hints": [
+        "You can use the expression `x ** 2` to square a number `x`.",
+        "Remember to store the result in a list called `squares`, rather than the original `numbers` list.",
+        "The list comprehension should iterate over each number in the list `numbers`.",
+        "The list comprehension should have the form `[expression for item in iterable]`.",
+        "The `expression` should square the `item`."
+      ],
+      "test_cases": [
+        {
+          "input": "squares",
+          "output": "[1, 4, 9, 16, 25]"
+        }
+      ]
+    },
+    {
+      "type": "multiple_choice",
+      "question": "What will be the output of the following list comprehension?\n\n```python\nnumbers = [1, 2, 3, 4, 5]\nsquares = [x ** 2 for x in numbers if x % 2 == 0]\nprint(squares)\n```\n",
+      "hints": [
+        "The list comprehension squares each number in the list `numbers` if the number is even.",
+        "The condition `if x % 2 == 0` checks if the number `x` is even, by checking if it's divisible by 2."
+      ],
+      "options": {
+        "a": "[4, 16]",
+        "b": "[1, 4, 9, 16, 25]",
+        "c": "[1, 9, 25]"
+      },
+      "answer": "a"
+    }
+  ],
+  "2": [
+    {
+      "type": "write_code",
+      "question": "Write a generator function `even_numbers` that generates even numbers starting from 2 up to a given limit `n` (including `n`, if it's even).",
+      "hints": [
+        "You can use a `while` loop to generate even numbers starting from 2.",
+        "The generator function should `yield` each even number.",
+        "The generator function should stop when the next even number is greater than `n`."
+      ],
+      "test_cases": [
+        {
+          "input": "list(even_numbers(5))",
+          "output": "[2, 4]"
+        },
+        {
+          "input": "list(even_numbers(10))",
+          "output": "[2, 4, 6, 8, 10]"
+        }
+      ]
+    },
+    {
+      "type": "multiple_choice",
+      "question": "What will be the output of the following code snippet?\n\n```python\ndef fibonacci_generator():\n    a, b = 0, 1\n    while True:\n        yield a\n        a, b = b, a + b\n\nfib_gen = fibonacci_generator()\nfib_sequence = [next(fib_gen) for _ in range(5)]\nprint(fib_sequence)\n```\n",
+      "hints": [
+        "The code snippet defines a generator function `fibonacci_generator` that generates Fibonacci numbers.",
+        "The list comprehension `[next(fib_gen) for _ in range(5)]` generates the first 5 Fibonacci numbers using the generator."
+      ],
+      "options": {
+        "a": "[0, 1, 1, 2, 3]",
+        "b": "[1, 1, 2, 3, 5]",
+        "c": "[0, 1, 2, 3, 4]"
+      },
+      "answer": "a"
+    }
+  ],
+  "3": [
+    {
+      "type": "multiple_choice",
+      "question": "What is the purpose of an iterator in Python?",
+      "hints":[
+        "An iterator is an object that can be iterated over using a `for` loop or other looping constructs."
+      ],
+      "options": {
+        "a": "To generate random numbers.",
+        "b": "To iterate over items in a sequence or collection.",
+        "c": "To create new objects from existing ones."
+      },
+      "answer": "b"
+    },
+    {
+      "type": "multiple_choice",
+      "question": "Consider the following iterator implementation:\n\n```python\nclass Countdown:\n    def __init__(self, start):\n        self.start = start\n\n    def __iter__(self):\n        return self\n\n    def __next__(self):\n        if self.start <= 0:\n            raise StopIteration\n        else:\n            self.start -= 1\n            return self.start + 1\n\ncountdown = Countdown(3)\nprint(list(countdown))\n```\n\nWhat will be the output of the code snippet?",
+      "hints": [
+        "The `Countdown` class defines an iterator that counts down from a given start number to 1.",
+        "The `__iter__` method returns the iterator object itself, and the `__next__` method generates the next value in the sequence."
+      ],
+      "options": {
+        "a": "[3, 2, 1]",
+        "b": "[1, 2, 3]",
+        "c": "[0, 1, 2]"
+      },
+      "answer": "a"
+    },
+    {
+      "type": "write_code",
+      "question": "Write an iterator class `Countdown` that iterates from a given start number down to 1.",
+      "hints": [
+        "The iterator should start from the given `start` number and count down to 1.",
+        "Remember to decrement the countdown value after each iteration.",
+        "The `__iter__` method should return the iterator object itself.",
+        "The `__next__` method should return the next value in the countdown sequence."
+      ],
+      "test_cases":[
+        {
+          "input": "list(Countdown(3))",
+          "output": "[3, 2, 1]"
+        },
+        {
+          "input": "list(Countdown(0))",
+          "output": "[]"
+        },
+        {
+          "input": "next(Countdown(5))",
+          "output": "5"
+        }
+      ]
+    }
+  ],
+  "4": [
+    {
+      "type": "multiple_choice",
+      "question": "Does Python support function overloading by default (like in languages such as C++)?",
+      "options": {
+        "a": "Yes",
+        "b": "No",
+        "c": "It depends on the version of Python used"
+      },
+      "answer": "b"
+    },
+    {
+      "type": "write_code",
+      "question": "Implement a function `multiply` that can take either two or three arguments. If two arguments are provided, it should return their product. If three arguments are provided, it should return their product plus the third argument.",
+      "test_cases": [
+        {
+          "input": "multiply(2, 3)",
+          "output": "6"
+        },
+        {
+          "input": "multiply(2, 3, 4)",
+          "output": "10"
+        },
+        {
+          "input": "multiply(-2, 5)",
+          "output": "-10"
+        },
+        {
+          "input": "multiply(-2, 5, 3)",
+          "output": "-30"
+        }
+      ]
+    },
+    {
+      "type": "multiple_choice",
+      "question": "Consider the following Python code:\n\n```python\ndef add(a, b):\n    return a + b\n\ndef add(a, b, c):\n    return a + b + c\n\nprint(add(1, 2))\n```\n\nWhat will be the output of this code?",
+      "options": {
+        "a": "3",
+        "b": "TypeError: add() missing 1 required positional argument: 'c'",
+        "c": "TypeError: add() takes 3 positional arguments but 2 were given"
+      }
+    }
+  ]
+}
