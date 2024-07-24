@@ -1,4 +1,7 @@
-from bot.levels import Level
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from levels import Level
 
 
 class Controller:
@@ -7,7 +10,7 @@ class Controller:
     def __init__(self) -> None:
         self.levels = {}
 
-    def add_level(self, level: Level) -> None:
+    def add_level(self, level: "Level") -> None:
         """Add a level to the controller.
 
         Raises a ValueError if a level with the same id or map position already exists.
@@ -18,7 +21,7 @@ class Controller:
             raise ValueError
         self.levels[level.id] = level
 
-    def get_level(self, position: tuple[int, int]) -> Level:
+    def get_level(self, position: tuple[int, int]) -> "Level":
         """Get the level at a given map position.
 
         Raises a ValueError if no level is found at the given position.

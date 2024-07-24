@@ -1,4 +1,3 @@
-import asyncio
 import re
 from abc import abstractmethod
 from typing import Protocol
@@ -12,8 +11,31 @@ class Question(Protocol):
     """Protocol that all questions must implement.
 
     Different question types can be created by subclassing this protocol.
+
+    The general structure of a question's JSON data is as follows:
+    {
+        "question": "What is 2 + 2?",
+        "hints": [
+            "Remember the order of operations."
+            ...
+        ],
+        "type": "multiple_choice",
+    }
+
+    The `hints` field is a list of strings that provide hints to the user. If the hints are requested
+    by the user, they will be shown in the order that they are listed in the JSON data.
+
+    The `question` field is a string that contains the question text.
+
+    The `type` field determines the type of question. The following types are currently supported:
+    - "multiple_choice": The user selects the correct answer from multiple choices
+    - "write_code": The user writes Python code to solve a problem
+
+    Depending on what the `type` field is set to, there are additional fields that must be included in the JSON data.
+    The additional fields can be found in the docstrings of the specific Question subclasses.
     """
 
+    type: str
     question: str
     hints: list[str]
 
@@ -28,9 +50,28 @@ class Question(Protocol):
 
 
 class MultipleChoiceQuestion(Question):
-    """A type of Level where the user selects the correct answer from multiple choices."""
+    """A type of Level where the user selects the correct answer from multiple choices.
 
-    def __init__(self, question: str, hints: list[str], options: list[str], answer: str) -> None:
+    In the JSON data for a multiple choice question, the following additional fields must be included:
+    {
+        "options": {
+            "a": "4",
+            "b": "5",
+            "c": "6",
+        },
+        "answer": "a",
+    }
+
+    The `options` field is a dictionary where the keys are the options and the values are the value of the option.
+    The keys should be single lowercase letters, starting from "A" and increasing alphabetically and serves as the
+    ID for the option.
+
+    The `answer` field is a string that contains the ID of the correct answer. The ID should be one of the keys in the
+    `options` dictionary.
+    """
+
+    def __init__(self, question: str, hints: list[str], options: dict[str, str], answer: str) -> None:
+        self.type = "multiple_choice"
         self.question = question
         self.hints = hints
         self.options = options
@@ -41,9 +82,27 @@ class MultipleChoiceQuestion(Question):
 
 
 class WriteCodeQuestion(Question):
-    """A type of Level where the user writes code to solve a problem."""
+    """A type of Level where the user writes code to solve a problem.
+
+    In the JSON data for a write code question, the following additional fields must be included:
+    {
+        "test_cases": [
+            ["add(1, 2)", "3"],
+            ["add(-1, 3)", "2"],
+        ],
+    }
+
+    The `test_cases` field is a list of tuples where the first element is the input to a unit test and the second
+    is the expected output. The input and output should be strings that can be evaluated as Python code. For example,
+    if the expected value is the string literal 'hello', it should be enclosed in quotes: "'hello'".
+
+    The question should clearly state what the expected name of the function to be created is. For example, if the
+    question is to create a function that adds two numbers, the question should state that the function should be
+    named `add`. If the function is not named correctly, the tests will fail.
+    """
 
     def __init__(self, question: str, hints: list[str], test_cases: list[tuple[str, str]]) -> None:
+        self.type = "write_code"
         self.question = question
         self.hints = hints
         self.test_cases = test_cases
@@ -96,23 +155,12 @@ class WriteCodeQuestion(Question):
 
 def question_factory(**question_data) -> Question:  # noqa: ANN003
     """Create Question instance using the correct Question subclass."""
-    match question_data.get("type"):
+    question_type = question_data.get("type")
+    question_data.pop("type")
+    match question_type:
         case "multiple_choice":
             return MultipleChoiceQuestion(**question_data)
         case "write_code":
             return WriteCodeQuestion(**question_data)
         case _:
             raise ValueError
-
-
-if __name__ == "__main__":
-    # Example code for testing purposes. Will be removed in later nevels of the
-    write_code_question = WriteCodeQuestion(
-        question="Write an `add` function that adds two numbers.",
-        hints=["Is your function named exactly `add`?", "Remember to use the `return` keyword."],
-        test_cases=[("add(1, 2)", "3"), ("add(-1,3)", "2")],
-    )
-    code = """def add(a, b):
-    return a + b"""
-    output = asyncio.run(write_code_question.check_response(code))
-    print(f"\n{output}")

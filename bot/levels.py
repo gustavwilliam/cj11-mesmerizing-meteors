@@ -35,6 +35,9 @@ class Level(Protocol):
         self.controller.add_level(self)
         self.fetch_level_data()
 
+    def __str__(self) -> str:
+        return self.name
+
     def fetch_level_data(self) -> None:
         """Fetch the questions, answers, and other data for the level and assign to questions attribute.
 
@@ -42,7 +45,7 @@ class Level(Protocol):
         must match the id attribute of the Level subclass for the information to be loaded.
         If no questions are found for the level, a ValueError is raised.
         """
-        questions = all_questions.get(self.id)
+        questions = all_questions.get(str(self.id))
         if questions is None:
             raise ValueError("No questions found for level " + str(self.id))
         self.questions = [question_factory(**question_data) for question_data in questions]
@@ -64,18 +67,13 @@ class Level(Protocol):
 class Level1(Level):  # noqa: D101
     id = 1
     name = "Level 1"
-    topic = "Python Basics"
+    topic = "List Comprehensions"
     map_position = (1, 0)
 
     def run(self) -> None:  # noqa: D102
         print("Running level 1 -- Here are the questions:")
         for question in self.questions:
             print(question)
-            response = input("Your answer: ")
-            if question.check_response(response):
-                print("Correct!")
-            else:
-                print("Incorrect!")
 
 
 # Other levels will be defined here, following the same pattern as Level1
