@@ -1,7 +1,13 @@
+import json
 from abc import abstractmethod
+from pathlib import Path
 from typing import Protocol
 
-from bot.controller import Controller
+from controller import Controller
+from questions import Question, question_factory
+
+with Path.open(Path("bot/questions.json")) as f:
+    all_questions = json.load(f)
 
 
 class Level(Protocol):
@@ -17,14 +23,29 @@ class Level(Protocol):
     """
 
     controller: Controller
-    id: str
+    id: int
     name: str
-    description: str
+    topic: str
     map_position: tuple[int, int]
+    questions: list[Question]
 
-    def __init__(self) -> None:
+    def __init__(self, controller: Controller) -> None:
         """Register the level to the controller."""
+        self.controller = controller
         self.controller.add_level(self)
+        self.fetch_level_data()
+
+    def fetch_level_data(self) -> None:
+        """Fetch the questions, answers, and other data for the level and assign to questions attribute.
+
+        The data is retrieved from bot/questions.json. The id of the level in the JSON file
+        must match the id attribute of the Level subclass for the information to be loaded.
+        If no questions are found for the level, a ValueError is raised.
+        """
+        questions = all_questions.get(self.id)
+        if questions is None:
+            raise ValueError("No questions found for level " + str(self.id))
+        self.questions = [question_factory(**question_data) for question_data in questions]
 
     @abstractmethod
     def run(self) -> None:
@@ -40,13 +61,21 @@ class Level(Protocol):
         print(self.name + " succeeded")  # Default implementation
 
 
-class EvaluateCodeLevel(Level):
-    """A type of Level where the user figures out the output of a code snippet."""
+class Level1(Level):  # noqa: D101
+    id = 1
+    name = "Level 1"
+    topic = "Python Basics"
+    map_position = (1, 0)
+
+    def run(self) -> None:  # noqa: D102
+        print("Running level 1 -- Here are the questions:")
+        for question in self.questions:
+            print(question)
+            response = input("Your answer: ")
+            if question.check_response(response):
+                print("Correct!")
+            else:
+                print("Incorrect!")
 
 
-class MultipleChoiceLevel(Level):
-    """A type of Level where the user selects the correct answer from multiple choices."""
-
-
-class WriteCodeLevel(Level):
-    """A type of Level where the user writes code to solve a problem."""
+# Other levels will be defined here, following the same pattern as Level1
