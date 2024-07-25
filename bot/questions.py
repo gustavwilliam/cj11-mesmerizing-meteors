@@ -1,8 +1,16 @@
 import re
+import typing
 from abc import abstractmethod
+from enum import Enum, auto
 from typing import Protocol
 
+import discord
+from discord import Embed, Interaction, TextStyle
+from discord.ui.view import View
 from utils.eval import eval_python
+
+if typing.TYPE_CHECKING:
+    from levels import Level
 
 check_test = re.compile(r"Ran 1 test in \S+s\n\nOK\n$")  # Successful unit tests output should end with this
 
@@ -38,15 +46,105 @@ class Question(Protocol):
     type: str
     question: str
     hints: list[str]
+    unlocked_hints: int  # Indexes of unlocked hints
 
     def __str__(self) -> str:
         """Return the question text."""
         return self.question
 
     @abstractmethod
-    def check_response(self, response: str) -> bool:
+    async def check_response(self, response: str) -> bool:
         """Check if the answer is correct."""
         raise NotImplementedError
+
+    def get_embed_description(self, question_index: int) -> str:
+        """Return the description for the embed message."""
+        return f"## Question {question_index}\n{self.question}" + (
+            "\n\n*Hints:*\n" + "\n".join(self.hints[: self.unlocked_hints]) if self.unlocked_hints else ""
+        )
+
+    def embed(self, level: "Level", question_index: int) -> Embed:
+        """Return an embed message for the question."""
+        return Embed(
+            title=f"{level.name}: {level.topic}",
+            description=self.get_embed_description(question_index),
+            color=discord.Color.blurple(),
+        )
+
+    def view(self) -> "QuestionView":
+        """Return the view for the question."""
+        if self.type == "multiple_choice":
+            return MultipleChoiceQuestionView(self)  # type: ignore  # noqa: PGH003
+        if self.type == "write_code":
+            return WriteCodeQuestionView(self)  # type: ignore  # noqa: PGH003
+        raise ValueError
+
+
+class QuestionStatus(Enum):
+    """Status of the question interaction."""
+
+    IN_PROGRESS = auto()
+    CORRECT = auto()
+    INCORRECT = auto()
+    EXITED = auto()
+
+
+class QuestionView(View):
+    """View for a question.
+
+    The view contains buttons for the user to interact with the question.
+    """
+
+    def __init__(self, question: Question) -> None:
+        super().__init__()
+        self.question = question
+        self.next_question_interaction: Interaction | None = None
+        self.status: QuestionStatus = QuestionStatus.IN_PROGRESS
+
+    @discord.ui.button(
+        emoji=discord.PartialEmoji.from_str("<:hint:1265996402891292675>"),
+        label="Hint",
+        row=2,
+        style=discord.ButtonStyle.secondary,
+    )
+    async def get_a_hint(self, interaction: discord.Interaction, _: discord.ui.Button) -> None:
+        """Reveal one more hint."""
+        if self.question.unlocked_hints < len(self.question.hints):
+            self.question.unlocked_hints += 1
+        hints = "- " + "\n- ".join(self.question.hints[: self.question.unlocked_hints])
+        await interaction.response.send_message(
+            content=f"### Hints ({self.question.unlocked_hints}/{len(self.question.hints)})\n" + hints,
+            ephemeral=True,
+        )
+
+    @discord.ui.button(
+        label="Quit level",
+        emoji=discord.PartialEmoji.from_str("<:exit:1265999816023080991>"),
+        style=discord.ButtonStyle.secondary,
+        row=2,
+    )
+    async def quit_button(self, interaction: discord.Interaction, _: discord.ui.Button) -> None:
+        """Quit the question."""
+        await self.on_quit(interaction)
+
+    async def on_quit(self, interaction: discord.Interaction) -> None:
+        """Execute when the user quits the question."""
+        self.status = QuestionStatus.EXITED
+        self.next_question_interaction = interaction
+        await self.next_question_interaction.response.defer()
+        self.stop()
+
+    async def on_success(self, interaction: discord.Interaction) -> None:
+        """Execute when the user answers the question correctly."""
+        self.status = QuestionStatus.CORRECT
+        self.next_question_interaction = interaction
+        await self.next_question_interaction.response.defer()
+        self.stop()
+
+    async def on_fail(self, interaction: discord.Interaction) -> None:
+        """Execute when the user answers the question incorrectly."""
+        self.status = QuestionStatus.INCORRECT
+        await interaction.response.send_message(content="Incorrect answer. Please try again.", ephemeral=True)
 
 
 class MultipleChoiceQuestion(Question):
@@ -74,11 +172,57 @@ class MultipleChoiceQuestion(Question):
         self.type = "multiple_choice"
         self.question = question
         self.hints = hints
+        self.unlocked_hints = 0
         self.options = options
         self.answer = answer
 
-    def check_response(self, response: str) -> bool:  # noqa: D102
+    async def check_response(self, response: str) -> bool:  # noqa: D102
         return response == self.answer
+
+
+class MultipleChoiceQuestionView(QuestionView):
+    """View for a multiple choice question.
+
+    The view contains buttons for the user to select the answer.
+    """
+
+    def __init__(self, question: MultipleChoiceQuestion) -> None:
+        super().__init__(question)
+        self.question = question
+        for option_id, label in question.options.items():
+            self.add_option_button(option_id, label)
+
+    @staticmethod
+    def _emoji(option_id: str) -> discord.PartialEmoji:
+        ids = {
+            "a": "<:letter_a:1265996405164474368>",
+            "b": "<:letter_b:1265996406028636232>",
+            "c": "<:letter_c:1265996407647768716>",
+            "d": "<:letter_d:1265996409040277595>",
+            "e": "<:letter_e:1265996410453622945>",
+            "f": "<:letter_a:1265996405164474368>",
+        }
+        return discord.PartialEmoji.from_str(
+            ids[option_id],
+        )
+
+    def add_option_button(self, option_id: str, label: str) -> None:
+        """Add a button for an option."""
+
+        async def callback(interaction: discord.Interaction) -> None:
+            """Button callback."""
+            if await self.question.check_response(option_id):
+                await self.on_success(interaction)
+            else:
+                await self.on_fail(interaction)
+
+        button = discord.ui.Button(
+            emoji=self._emoji(option_id),
+            label=label,
+            style=discord.ButtonStyle.primary,
+        )
+        button.callback = callback
+        self.add_item(button)
 
 
 class WriteCodeQuestion(Question):
@@ -101,10 +245,11 @@ class WriteCodeQuestion(Question):
     named `add`. If the function is not named correctly, the tests will fail.
     """
 
-    def __init__(self, question: str, hints: list[str], test_cases: list[tuple[str, str]]) -> None:
+    def __init__(self, question: str, hints: list[str], test_cases: list[dict[str, str]]) -> None:
         self.type = "write_code"
         self.question = question
         self.hints = hints
+        self.unlocked_hints = 0
         self.test_cases = test_cases
 
     async def check_response(self, code: str) -> bool:
@@ -141,7 +286,11 @@ class WriteCodeQuestion(Question):
         to debug. However, since the code is running in a sandboxed environment, this method of generating tests
         poses no security risk.
         """
-        test_strings = [self._get_assert_equal_string(*test_case) for test_case in self.test_cases]
+        test_strings = []
+        for test_case in self.test_cases:
+            input = test_case["input"]
+            output = test_case["output"]
+            test_strings.append(self._get_assert_equal_string(input, output))
         return (
             "import unittest\n"  # Import unittest module
             + user_code.expandtabs(2)  # Insert user code. Tabs -> spaces for consistency with test code
@@ -150,6 +299,95 @@ class WriteCodeQuestion(Question):
             + "\n  "  # Indentation for first test case
             + "\n  ".join(test_strings)  # Add assertions for test cases
             + "\nunittest.main()"  # Run unit tests
+        )
+
+    def get_embed_description(self, question_index: int) -> str:  # noqa: D102
+        return (
+            super().get_embed_description(question_index)
+            + "\n\n*Tip: press the Code Playground button to try out your code before submitting!*"
+        )
+
+
+class CodeModal(discord.ui.Modal, title="Submit code"):
+    """Modal for submitting code."""
+
+    def __init__(self, *args, view: "WriteCodeQuestionView", title: str | None = None, **kwargs) -> None:  # noqa: ANN002, ANN003
+        super().__init__(*args, **kwargs)
+        self.view = view
+        self.submit_interaction = None
+        if title is not None:
+            self.title = title
+
+    code_input = discord.ui.TextInput(
+        label="Python Code",
+        placeholder="Write your code here",
+        style=TextStyle.long,
+        min_length=1,
+        max_length=2000,
+    )
+
+    async def on_submit(self, interaction: discord.Interaction) -> None:
+        """Submit the code."""
+        self.submit_interaction = interaction
+
+
+class WriteCodeQuestionView(QuestionView):
+    """View for a write code question.
+
+    The view contains a text box for the user to write code.
+    """
+
+    def __init__(self, question: WriteCodeQuestion) -> None:
+        super().__init__(question)
+        self.question = question
+        self.post_modal_interaction: Interaction
+
+    @discord.ui.button(
+        label="Enter Python code",
+        style=discord.ButtonStyle.primary,
+    )
+    async def submit_button(self, interaction: discord.Interaction, _: discord.ui.Button) -> None:
+        """Open modal and get text response."""
+        modal = CodeModal(view=self)
+        await interaction.response.send_modal(modal)
+        await modal.wait()
+        if modal.submit_interaction is None:
+            self.status = QuestionStatus.EXITED
+            print("Unable to get interaction, exiting question.")
+            self.stop()
+            return
+
+        if await self.question.check_response(modal.code_input.value):
+            await self.on_success(modal.submit_interaction)
+        else:
+            await self.on_fail(modal.submit_interaction)
+
+    @discord.ui.button(
+        label="Code Playground",
+        style=discord.ButtonStyle.primary,
+    )
+    async def playground_button(self, interaction: discord.Interaction, _: discord.ui.Button) -> None:
+        """Open code playground modal."""
+        modal = CodeModal(view=self, title="Test you code")
+        await interaction.response.send_modal(modal)
+        await modal.wait()
+        if modal.submit_interaction is None:
+            await interaction.response.send_message(
+                content="Unable to run code right now. Please try again later.",
+                ephemeral=True,
+            )
+            return
+
+        await modal.submit_interaction.response.defer(thinking=True, ephemeral=True)
+        code_input = modal.code_input.value
+        output = await eval_python(code_input)
+        await modal.submit_interaction.followup.send(
+            embed=Embed(
+                title="Code Playground Results",
+                description=f"**Input:**\n```py\n{code_input}\n```\n**Output:**\n```py\n{output[:1900]}\n```",
+                color=discord.Color.blurple(),
+            ),
+            ephemeral=True,
         )
 
 

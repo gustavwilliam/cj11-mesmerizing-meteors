@@ -2,8 +2,10 @@ from os import getenv
 
 import async_tio
 import discord
+from controller import Controller
 from discord.ext import commands
 from dotenv import load_dotenv
+from levels import register_all_levels
 from map import Map, generate_map, image_to_discord_file
 from paginator import Paginator
 from utils.eval import eval_python
@@ -62,9 +64,9 @@ async def get_map(interaction: discord.Interaction, x: int = 0, y: int = 0) -> N
 
 
 @bot.tree.command(name="eval", description="Evaluate Python code")
-async def eval_code(interaction: discord.Interaction, code: str) -> None:
+async def eval_code(interaction: discord.Interaction, *, code: str) -> None:
     """Evaluate Python code and return the output."""
-    await interaction.response.defer()
+    await interaction.response.defer(ephemeral=True)
     try:
         output = await eval_python(code)
         output = (
@@ -79,6 +81,7 @@ async def eval_code(interaction: discord.Interaction, code: str) -> None:
             description=output,
             color=discord.Color.blurple(),
         ),
+        ephemeral=True,  # To not drown the channel with eval, since the game map would be lost
     )
 
 
@@ -92,6 +95,9 @@ async def on_ready() -> None:
         print(f"{len(synced)} commands synchronized")
     except discord.DiscordException as e:
         print(f"Err: {e}")
+
+    register_all_levels()
+    print("Loaded levels:", ", ".join(str(level.id) for level in Controller().levels))
 
 
 # Start the bot

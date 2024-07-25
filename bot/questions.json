@@ -137,6 +137,9 @@
     {
       "type": "multiple_choice",
       "question": "Does Python support function overloading by default (like in languages such as C++)?",
+      "hints":[
+        "Function overloading refers to the ability to define multiple functions with the same name but different parameters."
+      ],
       "options": {
         "a": "Yes",
         "b": "No",
@@ -147,6 +150,10 @@
     {
       "type": "write_code",
       "question": "Implement a function `multiply` that can take either two or three arguments. If two arguments are provided, it should return their product. If three arguments are provided, it should return their product plus the third argument.",
+      "hints": [
+        "You can use default argument values to handle the case where the third argument is not provided.",
+        "The function should return the product of the first two arguments plus the third argument, if it exists."
+      ],
       "test_cases": [
         {
           "input": "multiply(2, 3)",
@@ -169,11 +176,16 @@
     {
       "type": "multiple_choice",
       "question": "Consider the following Python code:\n\n```python\ndef add(a, b):\n    return a + b\n\ndef add(a, b, c):\n    return a + b + c\n\nprint(add(1, 2))\n```\n\nWhat will be the output of this code?",
+      "hints": [
+        "The code defines two functions with the same name `add` but different numbers of arguments.",
+        "Python does not support function overloading by default, so the second function definition will overwrite the first."
+      ],
       "options": {
         "a": "3",
         "b": "TypeError: add() missing 1 required positional argument: 'c'",
         "c": "TypeError: add() takes 3 positional arguments but 2 were given"
-      }
+      },
+      "answer": "c"
     }
   ]
 }

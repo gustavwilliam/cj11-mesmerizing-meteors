@@ -1,9 +1,9 @@
 import io
 import json
-from enum import Enum
 from pathlib import Path
 
 import discord
+from controller import Controller
 from matplotlib import font_manager
 from PIL import Image, ImageDraw, ImageFont
 
@@ -24,49 +24,9 @@ with Path.open(path_bot / "map_z.json") as f:
     map_z = json.load(f)
 
 
-class MapPosition(Enum):
-    """Positions that the camera can focus on.
-
-    Consists of the x, y coordinates of the center of the camera.
-    The coordinates are in the map format. Not pixel coordinates.
-
-    The following types of positions are available:
-    - LvlX: Levels 1 to 11, where X is the level's number
-    - LvlA, LvlB, LvlC: Special levels A, B, and C
-    """
-
-    Lvl1 = (1, 0)
-    Lvl2 = (3, 0)
-    Lvl3 = (5, 0)
-    Lvl4 = (8, 0)
-    Lvl5 = (10, 0)
-    Lvl6 = (11, 1)
-    Lvl7 = (11, 3)
-    Lvl8 = (11, 5)
-    Lvl9 = (10, 6)
-    Lvl10 = (8, 6)
-    Lvl11 = (6, 6)
-    LvlA = (8, -2)
-    LvlB = (12, 1)
-    LvlC = (13, 4)
-
-
 def validate_coord(coord: tuple[int, int]) -> bool:
-    """Raise an error if the coordinate is not in the map."""
+    """Return whether or not the coordinate is not in the map."""
     return not (map_z.get(str(coord[0])) is None or map_z[str(coord[0])].get(str(coord[1])) is None)
-
-
-def is_level(coord: tuple[int, int]) -> bool:
-    """Check if the given coordinate is a level."""
-    return coord in [pos.value for pos in MapPosition]
-
-
-def get_embed_description(position: tuple[int, int]) -> str:
-    """Get a descripton of the map at the given position."""
-    for key, value in MapPosition.__members__.items():
-        if value.value == position:
-            return f"Hovering: {key}\n**Press <:check:1265079659448766506> to start level.**"
-    return "Press the arrow keys to move around."
 
 
 class Map(discord.ui.View):
@@ -94,6 +54,15 @@ class Map(discord.ui.View):
         # happen if the user somehow manages to click the button before it
         # has a chance to be disabled. In that case, we just ignore the click.
 
+    @staticmethod
+    def get_embed_description(position: tuple[int, int]) -> str:
+        """Get a descripton of the map at the given position."""
+        level = Controller().get_level(position)
+        if level is None:
+            return "Press the arrow keys to move around."
+
+        return f"## {level.name}: {level.topic}\nPress <:check:1265079659448766506> to start the level."
+
     def update_buttons(self) -> None:
         """Update the buttons to match the current position."""
 
@@ -113,7 +82,7 @@ class Map(discord.ui.View):
             if child.custom_id == "button_right":
                 child.disabled = should_disable(x + 1, y)
             if child.custom_id == "button_confirm":
-                child.disabled = not is_level(self.position)
+                child.disabled = not Controller().is_level(self.position)
 
     async def navigate(
         self,
@@ -124,7 +93,7 @@ class Map(discord.ui.View):
             title=f"\U0001f5fa {self.user.display_name}'s Map",
             color=discord.Color.blurple(),
         )
-        embed.description = get_embed_description(self.position)
+        embed.description = self.get_embed_description(self.position)
         img = image_to_discord_file(
             generate_map(self.position, player_name=self.user.display_name),
             image_name := "image",
@@ -204,7 +173,9 @@ class Map(discord.ui.View):
         _: discord.ui.Button,
     ) -> None:
         """Confirm/select on the map."""
-        await interaction.response.send_message("Confirmed/selected.", ephemeral=True)
+        level = Controller().get_level(self.position)
+        if level is not None:
+            await level().run(interaction=interaction, map=self)
 
 
 def get_camera_box(
