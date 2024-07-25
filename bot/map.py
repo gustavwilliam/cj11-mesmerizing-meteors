@@ -173,7 +173,9 @@ class Map(discord.ui.View):
         _: discord.ui.Button,
     ) -> None:
         """Confirm/select on the map."""
-        await interaction.response.send_message("Confirmed/selected.", ephemeral=True)
+        level = Controller().get_level(self.position)
+        if level is not None:
+            await level().run(interaction=interaction, map=self)
 
 
 def get_camera_box(

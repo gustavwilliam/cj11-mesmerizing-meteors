@@ -2,8 +2,11 @@ import json
 from pathlib import Path
 from typing import Protocol
 
+import discord
 from controller import Controller
-from questions import Question, question_factory
+from discord import Interaction
+from map import Map, generate_map, image_to_discord_file
+from questions import Question, QuestionStatus, question_factory
 
 with Path.open(Path("bot/questions.json")) as f:
     all_questions = json.load(f)
@@ -53,8 +56,51 @@ class Level(Protocol):
             raise ValueError("No questions found for level " + str(self.id))
         self.questions = [question_factory(**question_data) for question_data in questions]
 
-    def run(self) -> None:
+    async def return_to_map(self, interaction: Interaction, map: Map) -> None:
+        """Return to the map after the level is exited."""
+        img = image_to_discord_file(
+            generate_map(
+                map.position,
+                player_name=interaction.user.display_name,
+            ),
+            image_name := "image",
+        )
+        embed = discord.Embed(
+            title=f"\U0001f5fa {interaction.user.display_name}'s map",
+            description="Press the arrow keys to move around.",
+            color=discord.Color.blurple(),
+        )
+        embed.set_image(url=f"attachment://{image_name}.png")
+        await interaction.edit_original_response(
+            attachments=[img],
+            embed=embed,
+            view=Map(map.position, interaction.user),
+        )
+
+    async def run(self, interaction: Interaction, map: Map) -> None:
         """Run the level."""
+        next_question_interaction = interaction
+        for i, question in enumerate(self.questions):
+            question_view = question.view()
+            await next_question_interaction.response.edit_message(
+                embed=question.embed(level=self, question_index=i + 1),
+                view=question_view,
+                attachments=[],
+            )
+            await question_view.wait()
+            next_question_interaction = question_view.next_question_interaction
+            if question_view.status == QuestionStatus.CORRECT:
+                self.on_success()
+            elif question_view.status == QuestionStatus.INCORRECT:
+                self.on_failure()
+            elif question_view.status == QuestionStatus.EXITED:
+                self.on_failure()
+                break
+            if next_question_interaction is None:
+                break
+
+        if next_question_interaction is not None:
+            await self.return_to_map(interaction, map)
 
     def on_failure(self) -> None:
         """Call when the player fails the level."""

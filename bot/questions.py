@@ -1,8 +1,16 @@
 import re
+import typing
 from abc import abstractmethod
+from enum import Enum, auto
 from typing import Protocol
 
+import discord
+from discord import Embed, Interaction
+from discord.ui.view import View
 from utils.eval import eval_python
+
+if typing.TYPE_CHECKING:
+    from levels import Level
 
 check_test = re.compile(r"Ran 1 test in \S+s\n\nOK\n$")  # Successful unit tests output should end with this
 
@@ -47,6 +55,78 @@ class Question(Protocol):
     async def check_response(self, response: str) -> bool:
         """Check if the answer is correct."""
         raise NotImplementedError
+
+    def embed(self, level: "Level", question_index: int) -> Embed:
+        """Return an embed message for the question."""
+        return Embed(
+            title=f"{level.name}: {level.topic}",
+            description=f"## Question {question_index}\n{self.question}",
+            color=discord.Color.blurple(),
+        )
+
+    def view(self) -> "QuestionView":
+        """Return the view for the question."""
+        return QuestionView(self)
+
+
+class QuestionStatus(Enum):
+    """Status of the question interaction."""
+
+    IN_PROGRESS = auto()
+    CORRECT = auto()
+    INCORRECT = auto()
+    EXITED = auto()
+
+
+class QuestionView(View):
+    """View for a question.
+
+    The view contains buttons for the user to interact with the question.
+    """
+
+    def __init__(self, question: Question) -> None:
+        super().__init__()
+        self.question = question
+        self.next_question_interaction: Interaction | None = None
+        self.status: QuestionStatus = QuestionStatus.IN_PROGRESS
+
+    @discord.ui.button(
+        label="Show hints",
+        style=discord.ButtonStyle.secondary,
+    )
+    async def show_hints(self, interaction: discord.Interaction, _: discord.ui.Button) -> None:
+        """Show the hints for the question."""
+        await interaction.response.send_message(content="\n".join(self.question.hints))
+
+    @discord.ui.button(
+        label="Correct answer",
+        style=discord.ButtonStyle.success,
+    )
+    async def correct_answer(self, interaction: discord.Interaction, _: discord.ui.Button) -> None:
+        """Correct answer button."""
+        self.next_question_interaction = interaction
+        self.status = QuestionStatus.CORRECT
+        self.stop()
+
+    @discord.ui.button(
+        label="Incorrect answer",
+        style=discord.ButtonStyle.danger,
+    )
+    async def incorrect_answer(self, interaction: discord.Interaction, _: discord.ui.Button) -> None:
+        """Incorrect answer button."""
+        self.next_question_interaction = interaction
+        self.status = QuestionStatus.INCORRECT
+        self.stop()
+
+    @discord.ui.button(
+        label="Quit",
+        style=discord.ButtonStyle.danger,
+    )
+    async def quit_button(self, interaction: discord.Interaction, _: discord.ui.Button) -> None:
+        """Quit the question."""
+        self.next_question_interaction = interaction
+        self.status = QuestionStatus.EXITED
+        self.stop()
 
 
 class MultipleChoiceQuestion(Question):
