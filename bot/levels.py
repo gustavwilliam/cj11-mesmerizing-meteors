@@ -79,27 +79,26 @@ class Level(Protocol):
 
     async def run(self, interaction: Interaction, map: Map) -> None:
         """Run the level."""
-        next_question_interaction = interaction
+        next_interaction = interaction
+        await next_interaction.response.defer()
         for i, question in enumerate(self.questions):
             question_view = question.view()
-            await next_question_interaction.response.edit_message(
+            await next_interaction.edit_original_response(
                 embed=question.embed(level=self, question_index=i + 1),
                 view=question_view,
                 attachments=[],
             )
             await question_view.wait()
-            next_question_interaction = question_view.next_question_interaction
-            if question_view.status == QuestionStatus.CORRECT:
-                self.on_success()
-            elif question_view.status == QuestionStatus.INCORRECT:
-                self.on_failure()
-            elif question_view.status == QuestionStatus.EXITED:
+            next_interaction = question_view.next_question_interaction
+            if question_view.status == QuestionStatus.EXITED:
                 self.on_failure()
                 break
-            if next_question_interaction is None:
+            if next_interaction is None:
                 break
+        else:
+            self.on_success()
 
-        if next_question_interaction is not None:
+        if next_interaction is not None:
             await self.return_to_map(interaction, map)
 
     def on_failure(self) -> None:

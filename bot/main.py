@@ -64,9 +64,9 @@ async def get_map(interaction: discord.Interaction, x: int = 0, y: int = 0) -> N
 
 
 @bot.tree.command(name="eval", description="Evaluate Python code")
-async def eval_code(interaction: discord.Interaction, code: str) -> None:
+async def eval_code(interaction: discord.Interaction, *, code: str) -> None:
     """Evaluate Python code and return the output."""
-    await interaction.response.defer()
+    await interaction.response.defer(ephemeral=True)
     try:
         output = await eval_python(code)
         output = (
@@ -81,6 +81,7 @@ async def eval_code(interaction: discord.Interaction, code: str) -> None:
             description=output,
             color=discord.Color.blurple(),
         ),
+        ephemeral=True,  # To not drown the channel with eval, since the game map would be lost
     )
 
 
