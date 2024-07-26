@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sqlite3
+from contextlib import closing
 from pathlib import Path
 
 PATH = Path(__file__).parent  # Path of the database
@@ -43,11 +44,12 @@ class Database:
     @property
     def cursor(self) -> sqlite3.Cursor:
         """Cursor property of database."""
-        return self.connection.cursor()
+        return closing(self.connection.cursor())
 
     def execute_command(self, command: str, data: tuple = ()) -> bool:
         """Execute the given command."""
-        if self.cursor.execute(command, data):
+        cursor = self.connection.cursor()
+        if cursor.execute(command, data):
             self.connection.commit()  # Commit the changes to the DB
             return True
         return False
@@ -72,7 +74,7 @@ class Score(Database):
 
     def fetch(self, level: int) -> list:
         """Fetch level scoresheet."""
-        with self.connection.cursor() as cursor:
+        with self.cursor as cursor:
             cursor.execute(
                 """
                 SELECT DISTINCT(username), score
@@ -92,13 +94,13 @@ class PlayerDetail(Database):
 
     def get(self, username: str) -> list:
         """Load player's details from player_detail table."""
-        with self.cursor() as cursor:
+        with self.cursor as cursor:
             cursor.execute(
                 """
                 SELECT username, level, score, completed
                 FROM player_detail
-                ORDER BY level ASC
-                WHERE username = ?;
+                WHERE username = ?
+                ORDER BY level ASC;
             """,
                 (username,),
             )
@@ -121,6 +123,6 @@ class PlayerDetail(Database):
             VALUES (:username, :level, :score, :completed)
         """
 
-        with self.cursor() as cursor:
+        with self.cursor as cursor:
             cursor.executemany(command, data)
         self.connection.commit()

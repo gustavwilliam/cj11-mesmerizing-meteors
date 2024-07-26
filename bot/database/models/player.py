@@ -75,8 +75,10 @@ class PlayHistory(list):
     """Collection of PlayDetails."""
 
     def __init__(self, *args, **kwargs) -> None:  # noqa: ANN003 ANN002
+        username = kwargs.pop("username")
         super().__init__(*args, **kwargs)
         self.new_plays = []
+        self.username = username
 
     def __contains__(self, item: str | PlayDetail) -> bool:
         if isinstance(item, str) and item.startswith("lvl"):
@@ -131,7 +133,9 @@ class PlayHistory(list):
         Special levels not included.
         """
         normal_level_played = [play for play in self if not play.is_special()]
-        return max(normal_level_played)
+        if normal_level_played:
+            return max(normal_level_played)
+        return PlayDetail(username=self.username, level=1, score=0, completed=False)
 
     def append(self, item: PlayDetail) -> None:
         """Save additions as new play before adding to history."""
@@ -150,7 +154,7 @@ class Player:
 
     def __init__(self, username: str, details: list) -> None:
         self.username = username
-        self.history = PlayHistory([PlayDetail(**record) for record in details])
+        self.history = PlayHistory([PlayDetail(**record) for record in details], username=username)
 
     def __repr__(self) -> str:
         return f"Player<username={self.username}>"
@@ -158,7 +162,7 @@ class Player:
     @property
     def max_level(self) -> int:
         """Returns max level."""
-        return self.history.max_level_played.level
+        return self.history.max_level_played.level if self.history else 0
 
     @property
     def next_level(self) -> int:
@@ -213,8 +217,13 @@ class Player:
     def new_data(self) -> dict:
         """Returns data added to history but not in database."""
         if not self.history:
-            return PlayDetail(username=self.username, score=0, completed=False, available=True)
+            return [{"username": self.username, "level": 1, "score": 0, "completed": False}]
         return [play.as_dict() for play in self.history.new_plays]
+
+    def complete_level(self, level: int, score: int) -> None:
+        """Mark level as completed."""
+        play = PlayDetail(username=self.username, level=level, score=score, completed=True)
+        self.history.append(play)
 
 
 class PlayerRepo:
