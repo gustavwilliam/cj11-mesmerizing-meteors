@@ -89,6 +89,7 @@ class Map(discord.ui.View):
         interaction: discord.Interaction,
     ) -> None:
         """Update map to the new position."""
+        await interaction.response.defer()
         embed = discord.Embed(
             title=f"\U0001f5fa {self.user.display_name}'s Map",
             color=discord.Color.blurple(),
@@ -101,9 +102,9 @@ class Map(discord.ui.View):
         embed.set_image(url=f"attachment://{image_name}.png")
         self.update_buttons()
 
-        await interaction.response.edit_message(
+        await interaction.followup.send(
             embed=embed,
-            attachments=[img],
+            file=img,
             view=self,
         )
 
