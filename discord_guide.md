@@ -29,7 +29,7 @@
    - Manage Messages
    - Embed Links
    - Attach Files
-   - Use External Emojşs
+   - Use External Emojis
    - Use External Stickers
    - Add Reactions
    - Use Slash Commands
