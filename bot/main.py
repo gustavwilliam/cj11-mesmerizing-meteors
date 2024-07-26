@@ -49,7 +49,7 @@ async def embed_command(interaction: discord.Interaction) -> None:
 @bot.tree.command(name="play", description="Start the Python Adventures game!")
 async def get_map(interaction: discord.Interaction) -> None:
     """Start the game."""
-    await interaction.response.defer()
+    await interaction.response.defer(thinking=True)
     story = StoryView(
         [
             StoryPage(
@@ -67,7 +67,7 @@ async def get_map(interaction: discord.Interaction) -> None:
     await story.wait()
     if story.last_interaction is None:
         return
-    await story.last_interaction.response.defer()
+    await story.last_interaction.response.defer(thinking=False)
 
     img = image_to_discord_file(
         generate_map(
@@ -82,7 +82,11 @@ async def get_map(interaction: discord.Interaction) -> None:
         color=discord.Color.blurple(),
     )
     embed.set_image(url=f"attachment://{image_name}.png")
-    await interaction.followup.send(file=img, embed=embed, view=Map((0, 0), interaction.user))
+    await interaction.edit_original_response(
+        attachments=[img],
+        embed=embed,
+        view=Map((0, 0), interaction.user),
+    )
 
 
 @bot.tree.command(name="eval", description="Evaluate Python code")
