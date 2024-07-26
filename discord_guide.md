@@ -8,7 +8,7 @@
 3. After creating your project, make the necessary settings in the ``Settings>OAuth2`` tab.
    - Select the ``bot`` option from the OAuth2 URL Generator section
    - Below, select the permissions you wish for the bot to have in the server. We recommend `Administrator` for testing purposes
-   - After clicking on the ``bot``, you can choose the permissions your bot will have from the window that opens.
+4. After clicking on the ``bot``, you can choose the permissions your bot will have from the window that opens.
 
       **Recommended settings:**
       ````
