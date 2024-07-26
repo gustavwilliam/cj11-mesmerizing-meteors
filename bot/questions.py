@@ -343,6 +343,7 @@ class CodeModal(discord.ui.Modal, title="Submit code"):
     async def on_submit(self, interaction: discord.Interaction) -> None:
         """Submit the code."""
         self.submit_interaction = interaction
+        self.stop()
 
 
 class WriteCodeQuestionView(QuestionView):

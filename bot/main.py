@@ -49,6 +49,7 @@ async def embed_command(interaction: discord.Interaction) -> None:
 @bot.tree.command(name="play", description="Start the Python Adventures game!")
 async def get_map(interaction: discord.Interaction) -> None:
     """Start the game."""
+    await interaction.response.defer()
     story = StoryView(
         [
             StoryPage(
@@ -58,7 +59,7 @@ async def get_map(interaction: discord.Interaction) -> None:
             ),
         ],
     )
-    await interaction.response.send_message(
+    await interaction.followup.send(
         embed=story.first_embed(),
         file=story.first_attachments()[0],
         view=story,
