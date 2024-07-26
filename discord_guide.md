@@ -29,5 +29,5 @@
          - Use Embeded activites
          - Create Polls
       ````
-   - Depending on the options you set, you can add your bot to your server from the ``GENERATED URL`` section created below.
+   - Depending on the options you set, you can add your bot to your server by opening the ``GENERATED URL`` in your browser, authenticating with discord, and adding it to a server of your choosing.
    - Make sure you give your bot enough room to play.
