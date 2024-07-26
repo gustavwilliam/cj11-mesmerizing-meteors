@@ -1,4 +1,5 @@
 from os import getenv
+from pathlib import Path
 
 import async_tio
 import discord
@@ -8,6 +9,7 @@ from dotenv import load_dotenv
 from levels import register_all_levels
 from map import Map, generate_map, image_to_discord_file
 from paginator import Paginator
+from story import StoryPage, StoryView
 from utils.eval import eval_python
 
 load_dotenv()
@@ -44,12 +46,31 @@ async def embed_command(interaction: discord.Interaction) -> None:
     await interaction.response.send_message(embed=pages[0], view=paginator)
 
 
-@bot.tree.command(name="map", description="Send a part of the game's map")
-async def get_map(interaction: discord.Interaction, x: int = 0, y: int = 0) -> None:
-    """Send a part of the game's map, centered on the given position."""
+@bot.tree.command(name="play", description="Start the Python Adventures game!")
+async def get_map(interaction: discord.Interaction) -> None:
+    """Start the game."""
+    story = StoryView(
+        [
+            StoryPage(
+                "Welcome to Python Adventures!",
+                "Mesmerizing Meteors wish you the best of luck in your adventures to come",
+                Path("bot/assets/title-art.png"),
+            ),
+        ],
+    )
+    await interaction.response.send_message(
+        embed=story.first_embed(),
+        file=story.first_attachments()[0],
+        view=story,
+    )
+    await story.wait()
+    if story.last_interaction is None:
+        return
+    await story.last_interaction.response.defer()
+
     img = image_to_discord_file(
         generate_map(
-            (x, y),
+            (0, 0),
             player_name=interaction.user.display_name,
         ),
         image_name := "image",
@@ -60,7 +81,7 @@ async def get_map(interaction: discord.Interaction, x: int = 0, y: int = 0) -> N
         color=discord.Color.blurple(),
     )
     embed.set_image(url=f"attachment://{image_name}.png")
-    await interaction.response.send_message(file=img, embed=embed, view=Map((x, y), interaction.user))
+    await interaction.followup.send(file=img, embed=embed, view=Map((0, 0), interaction.user))
 
 
 @bot.tree.command(name="eval", description="Evaluate Python code")
