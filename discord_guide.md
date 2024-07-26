@@ -17,15 +17,17 @@
          - View Channels
          - View Server Insights
 
-   Bot > Text Permissions
-   - Send Messages
-   - Manage Messages
-   - Embed Links
-   - Attach Files
-   - Use External Emojşs
-   - Use External Stickers
-   - Add Reactions
-   - Use Slash Commands
-   - Use Embeded activites
-   - Create Polls
-   ````
+      Bot > Text Permissions
+         - Send Messages
+         - Manage Messages
+         - Embed Links
+         - Attach Files
+         - Use External Emojis
+         - Use External Stickers
+         - Add Reactions
+         - Use Slash Commands
+         - Use Embeded activites
+         - Create Polls
+      ````
+   - Depending on the options you set, you can add your bot to your server from the ``GENERATED URL`` section created below.
+   - Make sure you give your bot enough room to play.
