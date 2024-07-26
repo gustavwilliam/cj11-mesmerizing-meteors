@@ -125,20 +125,19 @@ class QuestionView(View):
     )
     async def quit_button(self, interaction: discord.Interaction, _: discord.ui.Button) -> None:
         """Quit the question."""
+        await interaction.response.defer()
         await self.on_quit(interaction)
 
     async def on_quit(self, interaction: discord.Interaction) -> None:
         """Execute when the user quits the question."""
         self.status = QuestionStatus.EXITED
         self.next_question_interaction = interaction
-        await self.next_question_interaction.response.defer()
         self.stop()
 
     async def on_success(self, interaction: discord.Interaction) -> None:
         """Execute when the user answers the question correctly."""
         self.status = QuestionStatus.CORRECT
         self.next_question_interaction = interaction
-        await self.next_question_interaction.response.defer()
         self.stop()
 
     async def on_fail(self, interaction: discord.Interaction) -> None:
@@ -211,6 +210,7 @@ class MultipleChoiceQuestionView(QuestionView):
 
         async def callback(interaction: discord.Interaction) -> None:
             """Button callback."""
+            await interaction.response.defer()
             if await self.question.check_response(option_id):
                 await self.on_success(interaction)
             else:
@@ -343,6 +343,7 @@ class CodeModal(discord.ui.Modal, title="Submit code"):
     async def on_submit(self, interaction: discord.Interaction) -> None:
         """Submit the code."""
         self.submit_interaction = interaction
+        self.stop()
 
 
 class WriteCodeQuestionView(QuestionView):
@@ -370,7 +371,7 @@ class WriteCodeQuestionView(QuestionView):
             print("Unable to get interaction, exiting question.")
             self.stop()
             return
-
+        await modal.submit_interaction.response.defer()
         if await self.question.check_response(modal.code_input.value):
             await self.on_success(modal.submit_interaction)
         else:
