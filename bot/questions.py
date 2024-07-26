@@ -230,6 +230,7 @@ class WriteCodeQuestion(Question):
 
     In the JSON data for a write code question, the following additional fields must be included:
     {
+        "pre_code": "squares = ",  # Assign user's one-liner to variable squares
         "test_cases": [
             ["add(1, 2)", "3"],
             ["add(-1, 3)", "2"],
@@ -240,15 +241,27 @@ class WriteCodeQuestion(Question):
     is the expected output. The input and output should be strings that can be evaluated as Python code. For example,
     if the expected value is the string literal 'hello', it should be enclosed in quotes: "'hello'".
 
+    The `pre_code` code will be insert right before the user's code. No newline will be inserted between it and the
+    user's code, which enables assigning the user's code output to a variable. If you do want to separate the pre_code
+    from the user's code, please end pre_code with a line break (\\n). For example: `"pre_code": "import inspect\\n"`.
+    `pre_code` is an optional field.
+
     The question should clearly state what the expected name of the function to be created is. For example, if the
     question is to create a function that adds two numbers, the question should state that the function should be
     named `add`. If the function is not named correctly, the tests will fail.
     """
 
-    def __init__(self, question: str, hints: list[str], test_cases: list[dict[str, str]]) -> None:
+    def __init__(
+        self,
+        question: str,
+        hints: list[str],
+        test_cases: list[dict[str, str]],
+        pre_code: str | None = None,
+    ) -> None:
         self.type = "write_code"
         self.question = question
         self.hints = hints
+        self.pre_code = pre_code
         self.unlocked_hints = 0
         self.test_cases = test_cases
 
@@ -293,6 +306,7 @@ class WriteCodeQuestion(Question):
             test_strings.append(self._get_assert_equal_string(input, output))
         return (
             "import unittest\n"  # Import unittest module
+            + ("" if self.pre_code is None else self.pre_code)  # Adds code to run before user code, no newline after
             + user_code.expandtabs(2)  # Insert user code. Tabs -> spaces for consistency with test code
             + "\nclass Test(unittest.TestCase):\n"  # Setup test class
             + " def test_cases(self):"  # Setup test method
