@@ -235,6 +235,93 @@
 	  "answer": "b"
 	}
   ],
+  "6": [
+	{
+	  "type": "multiple_choice",
+	  "question": "What will be the output of the following code?\n\n```python\nwith open('example.txt', 'w') as file:\n    file.write('Hello, World!')\n\nwith open('example.txt', 'r') as file:\n    content = file.read()\nprint(content)\n```\n",
+	  "hints": [
+		  "The code writes 'Hello, World!' to a file named 'example.txt' and then reads the content of the file."
+	  ],
+	  "options": {
+      "a": "FileNotFoundError",
+      "b": "Hello, World!",
+      "c": ""
+	  },
+	  "answer": "b"
+	},
+	{
+	  "type": "multiple_choice",
+	  "question": "Which mode should you use to open a file for both reading and writing?\n",
+	  "hints": [
+		  "There is a mode that allows for both reading and writing in Python."
+	  ],
+	  "options": {
+		"a": "w+",
+		"b": "rw",
+		"c": "r+"
+	  },
+	  "answer": "c"
+	},
+	{
+		"type": "multiple_choice",
+		"question": "What will be the output of the following code?\n\n```python\nimport os\n\nclass FileManager:\n    def __init__(self, filename):\n        self.filename = filename\n    def process_file(self):\n        with open(self.filename, 'w') as f:\n            f.write('Line1\\nLine2\\nLine3')\n        with open(self.filename, 'r') as f:\n            lines = f.readlines()\n        return [line.strip() for line in lines if line.strip().startswith('Line')]\n\nmanager = FileManager('test_file.txt')\nprint(manager.process_file())\nos.remove('test_file.txt')\n```\n",
+		"hints": [
+			"The `process_file` method writes to the file, then reads from it and processes the lines.",
+			"The method uses `strip` and `startswith` to filter lines."
+		],
+		"options": {
+			"a": "['Line1', 'Line2']",
+			"b": "['Line1', 'Line2', 'Line3']",
+			"c": "['Line2', 'Line3']"
+		},
+		"answer": "b"
+	}
+  ],
+  "7": [
+	{
+	  "type": "multiple_choice",
+	  "question": "What does the following regular expression match?\n\n```python\nimport re\npattern = re.compile(r'\\d+')\nresult = pattern.match('abc123')\n```\n",
+	  "hints": [
+		  "The pattern '\\d+' matches one or more digits."
+	  ],
+	  "options": {
+      "a": "123",
+      "b": "abc",
+      "c": "None"
+	  },
+	  "answer": "c"
+	},
+	{
+	  "type": "write_code",
+	  "question": "Write a regular expression that matches an email address and test it using the re module.",
+	  "hints": [
+		  "Use the re module to compile and match the regular expression."
+	  ],
+	  "test_cases": [
+		{
+		  "input": "bool(pattern.match('test@example.com'))",
+		  "output": "True"
+		},
+		{
+		  "input": "bool(pattern.match('not-an-email'))",
+		  "output": "False"
+		}
+	  ]
+	},
+	{
+	  "type": "multiple_choice",
+	  "question": "What will be the output of the following code?\n\n```python\nimport re\npattern = re.compile(r'\\b\\w+\\b')\nresult = pattern.findall('This is a test')\nprint(result)\n```\n",
+	  "hints": [
+		  "The pattern '\\b\\w+\\b' matches whole words."
+	  ],
+	  "options": {
+      "a": "['This', 'is', 'a', 'test', '']",
+      "b": "['This', 'is', 'a', 'test']",
+      "c": "['T', 'h', 'i', 's', 'i', 's', 'a', 't', 'e', 's', 't']"
+	  },
+	  "answer": "b"
+	}
+  ],
   "8": [
 	{
 	  "type": "multiple_choice",
