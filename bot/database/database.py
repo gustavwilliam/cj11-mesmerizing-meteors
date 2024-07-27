@@ -1,9 +1,29 @@
 from __future__ import annotations
 
 import sqlite3
+from contextlib import closing
 from pathlib import Path
 
 PATH = Path(__file__).parent  # Path of the database
+
+SCHEMA = """
+    CREATE TABLE IF NOT EXISTS player_detail(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NON NULL,
+        level INTEGER NON NULL DEFAULT 1,
+        score INTEGER NON NULL DEFAULT 0,
+        completed BOOLEAN NON NULL DEFAULT 1
+    );
+
+    CREATE TABLE IF NOT EXISTS map(
+        username TEXT PRIMARY KEY,
+        coord_x INTEGER NON NULL,
+        coord_y INTEGER NON NULL
+    );
+"""
+
+sqlite3.register_adapter(bool, int)
+sqlite3.register_converter("BOOLEAN", lambda v: bool(int(v)))
 
 
 class Database:
@@ -20,6 +40,9 @@ class Database:
         self.__connection.row_factory = sqlite3.Row
         self.__cursor = self.__connection.cursor()
 
+        # initialize database
+        self.__cursor.executescript(SCHEMA)
+
     @property
     def connection(self) -> sqlite3.Connection:
         """Connection property of database."""
@@ -28,11 +51,12 @@ class Database:
     @property
     def cursor(self) -> sqlite3.Cursor:
         """Cursor property of database."""
-        return self.connection.cursor()
+        return closing(self.connection.cursor())
 
     def execute_command(self, command: str, data: tuple = ()) -> bool:
         """Execute the given command."""
-        if self.cursor.execute(command, data):
+        cursor = self.connection.cursor()
+        if cursor.execute(command, data):
             self.connection.commit()  # Commit the changes to the DB
             return True
         return False
@@ -51,53 +75,104 @@ class Database:
 
 
 class Score(Database):
-    """Class that handles interactions with the Score table."""
+    """SQL repository for scoresheet."""
 
-    __table_name__ = "Score"
-
-    def __init__(self) -> None:
-        super().__init__()
-
-        command = """CREATE TABLE IF NOT EXISTS Score (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username TEXT NON NULL,
-                score INTEGER NON NULL,
-                level INTEGER NON NULL
-                )"""
-        super().execute_command(command)
-
-    def add(self, level: int, username: str, score: int) -> bool:
-        """Add a score in the Score table."""
-        command = "INSERT INTO Score (level, username, score) VALUES(?, ?, ?)"
-        return bool(self.execute_command(command, (level, username, score)))
-
-    def remove(self, level: int, username: str) -> bool:
-        """Remove a score in the Score table."""
-        command = "DELETE FROM Score WHERE username = ? AND level = ?"
-        return bool(
-            self.execute_command(command, (username, level)),
-        )
-
-    def update(self, level: int, username: str, score: int) -> bool:
-        """Update score in Score table."""
-        command = """
-            UPDATE Score
-            SET score = ?
-            WHERE level = ?
-            AND username = ?
-        """
-        return bool(self.execute_command(command, (score, level, username)))
+    __table_name__ = "player_detail"
 
     def fetch(self, level: int) -> list:
         """Fetch level scoresheet."""
-        with self.connection.cursor() as cursor:
+        with self.cursor as cursor:
             cursor.execute(
                 """
-                SELECT username, score
-                FROM Score
+                SELECT DISTINCT(username), score
+                FROM player_detail
                 WHERE level = ?
                 ORDER BY score DESC
-            """,
+                """,
                 (level,),
             )
             return cursor.fetchall()
+
+
+class PlayerDetail(Database):
+    """SQL repository for player details."""
+
+    __table_name__ = "player_detail"
+
+    def get(self, username: str) -> list:
+        """Load player's details from player_detail table."""
+        with self.cursor as cursor:
+            cursor.execute(
+                """
+                SELECT username, level, score, completed
+                FROM player_detail
+                WHERE username = ?
+                ORDER BY level ASC;
+            """,
+                (username,),
+            )
+
+            return cursor.fetchall()
+
+    def insert(self, username: str, level: int, score: int, *, completed: bool = True) -> None:
+        """Insert into player_detail."""
+        command = """
+            INSERT INTO player_detail (username, level, score, completed)
+            VALUES (?, ?, ?, ?)
+        """
+
+        self.execute_command(command, (username, level, score, completed))
+
+    def insert_many(self, data: tuple[dict]) -> None:
+        """Insert many rows."""
+        command = """
+            INSERT INTO player_detail (username, level, score, completed)
+            VALUES (:username, :level, :score, :completed)
+        """
+
+        with self.cursor as cursor:
+            cursor.executemany(command, data)
+        self.connection.commit()
+
+    def get_map_coordinates(self, username: str) -> tuple:
+        """Get map coordinate of user."""
+        with self.cursor as cursor:
+            cursor.execute(
+                """
+                SELECT coord_x, coord_y
+                FROM map
+                WHERE username = ?
+            """,
+                (username,),
+            )
+
+            return cursor.fetchone()
+
+    def update_map_coordinates(self, username: str, coord_x: int, coord_y: int) -> None:
+        """Update map coordinate of user."""
+        # check if user exists in database
+        with self.cursor as cursor:
+            cursor.execute(
+                """
+                SELECT username
+                FROM map
+                WHERE username = ?
+            """,
+                (username,),
+            )
+
+            user = cursor.fetchone()
+
+        if user is not None:
+            command = """
+                UPDATE map
+                SET coord_x = ?, coord_y = ?
+                WHERE username = ?
+            """
+        else:
+            command = """
+            INSERT INTO map(coord_x, coord_y, username)
+            VALUES (?,?,?);
+            """
+
+        self.execute_command(command, (coord_x, coord_y, username))

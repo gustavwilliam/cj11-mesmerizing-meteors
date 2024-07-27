@@ -14,7 +14,7 @@ class TestDB:
         kwargs = {"username": username, "level": level, "score": score}
         self.store.append(kwargs)
 
-    def fetch(self, level: int) -> list[Score]:
+    def fetch_scores(self, level: int) -> list[Score]:
         """Fetch users from repository."""
         return [score for score in self.store if score["level"] == level]
 
@@ -97,15 +97,19 @@ class TestModels(unittest.TestCase):
         scoresheet_list = scoresheet.sort()
         assert ordered_score_list == scoresheet_list
 
+    """
+    scoresheet only fetch from database table
     def test_scoresheet_add_saves_to_database(self) -> None:
-        """Test scoresheet syncs with database."""
+        "Test scoresheet syncs with database."
         test_db = self.populate_db()
         scoresheet = ScoreSheet(db=test_db, level=2)
         scoresheet.add(username="noble", score=100)
         assert test_db.get(username="noble", score=100, level=2) is not None
+    """
 
+    """
     def test_update_scoresheet(self) -> None:
-        """Test update method."""
+        "Test update method."
         test_db = self.populate_db()
         scoresheet = ScoreSheet(db=test_db, level=3)
         score = 300
@@ -118,6 +122,7 @@ class TestModels(unittest.TestCase):
         # check database
         row = test_db.get(username="heavenmercy", level=3)
         assert row["score"] == score
+    """
 
     def test_remove_score_from_scoresheet(self) -> None:
         """Test remove method."""
