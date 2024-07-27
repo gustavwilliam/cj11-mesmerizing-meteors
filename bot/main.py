@@ -89,6 +89,16 @@ async def get_map(interaction: discord.Interaction) -> None:
     )
 
 
+@bot.tree.command(name="level", description="Play a specific level without opening the map")
+async def play_level(interaction: discord.Interaction, level: int) -> None:
+    """Play a specific level without opening the map."""
+    chosen_level = Controller().get_level_by_id(level)
+    if chosen_level is None:
+        await interaction.response.send_message("Level not found.", ephemeral=True)
+        return
+    await chosen_level().run(interaction=interaction, map=Map((0, 0), interaction.user))
+
+
 @bot.tree.command(name="eval", description="Evaluate Python code")
 async def eval_code(interaction: discord.Interaction, *, code: str) -> None:
     """Evaluate Python code and return the output."""

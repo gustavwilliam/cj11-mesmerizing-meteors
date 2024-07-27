@@ -39,6 +39,13 @@ class Controller:
                 return level
         return None
 
+    def get_level_by_id(self, id: int) -> type["Level"] | None:
+        """Get the level with the given id, or return None if no level exists."""
+        for level in self.levels:
+            if level.id == id:
+                return level
+        return None
+
     def is_level(self, position: tuple[int, int]) -> bool:
         """Check if a level exists at the given map position."""
         return any(level.map_position == position for level in self.levels)
