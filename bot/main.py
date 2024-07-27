@@ -69,9 +69,10 @@ async def get_map(interaction: discord.Interaction) -> None:
         return
     await story.last_interaction.response.defer(thinking=False)
 
+    map_view = Map(interaction.user)
     img = image_to_discord_file(
         generate_map(
-            (0, 0),
+            map_view.player.get_position(),
             player_name=interaction.user.display_name,
         ),
         image_name := "image",
@@ -85,7 +86,7 @@ async def get_map(interaction: discord.Interaction) -> None:
     await interaction.edit_original_response(
         attachments=[img],
         embed=embed,
-        view=Map((0, 0), interaction.user),
+        view=map_view,
     )
 
 
@@ -96,7 +97,7 @@ async def play_level(interaction: discord.Interaction, level: int) -> None:
     if chosen_level is None:
         await interaction.response.send_message("Level not found.", ephemeral=True)
         return
-    await chosen_level().run(interaction=interaction, map=Map((0, 0), interaction.user))
+    await chosen_level().run(interaction=interaction, map=Map(interaction.user))
 
 
 @bot.tree.command(name="eval", description="Evaluate Python code")
