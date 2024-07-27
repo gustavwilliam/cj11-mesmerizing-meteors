@@ -206,100 +206,9 @@
 	},
 	{
 	  "type": "write_code",
-	  "question": "Write a Python class named 'Range' that implements an iterator for generating numbers in a specified range. Use function overloading to allow the class to generate a range of numbers either from 0 to a given end value, or from a start value to an end value. Use a list comprehension to create the list of numbers for the iterator.",
+	  "question": "Write a regular expression that matches an email address. Compile the regex and store it in the variable `pattern`.\n\n*Assume that the email has the format `name@domain.com` and consists of only ascii letters.*",
 	  "hints": [
-		"Define an __init__ method to accept either one or two arguments (start and end values).",
-		"Use the __iter__ and __next__ methods to make the class an iterator.",
-		"Use a list comprehension within the __init__ method to generate the list of numbers."
-	  ],
-	  "test_cases": [
-		{
-		  "input": "r1 = Range(5); list(r1)",
-		  "output": "[0, 1, 2, 3, 4]"
-		},
-		{
-		  "input": "r2 = Range(3, 6); list(r2)",
-		  "output": "[3, 4, 5]"
-		}
-	  ]
-	},
-	{
-	  "type": "multiple_choice",
-	  "question": "Which of the following statements is true about generators and iterators in Python?",
-	  "hints": [
-		"Generators are a type of iterator, but they are created using a function that uses the 'yield' statement."
-	  ],
-	  "options": {
-		"a": "All generators are iterators, but not all iterators are generators.",
-		"b": "All iterators are generators, but not all generators are iterators.",
-		"c": "Generators cannot be used with list comprehensions."
-	  },
-	  "answer": "a"
-	}
-  ],
-
-  "6": [
-	{
-	  "type": "multiple_choice",
-	  "question": "What will be the output of the following code?\n\n```python\nwith open('example.txt', 'w') as file:\n    file.write('Hello, World!')\n\nwith open('example.txt', 'r') as file:\n    content = file.read()\nprint(content)\n```\n",
-	  "hints": [
-		"The code writes 'Hello, World!' to a file named 'example.txt' and then reads the content of the file."
-	  ],
-	  "options": {
-		"a": "FileNotFoundError",
-		"b": "Hello, World!",
-		"c": ""
-	  },
-	  "answer": "b"
-	},
-	{
-	  "type": "multiple_choice",
-	  "question": "Which mode should you use to open a file for both reading and writing?\n",
-	  "hints": [
-		"There is a mode that allows for both reading and writing in Python."
-	  ],
-	  "options": {
-		"a": "w+",
-		"b": "rw",
-		"c": "r+"
-	  },
-	  "answer": "c"
-	},
-	{
-		"type": "multiple_choice",
-		"question": "What will be the output of the following code?\n\n```python\nimport os\n\nclass FileManager:\n    def __init__(self, filename):\n        self.filename = filename\n    def process_file(self):\n        with open(self.filename, 'w') as f:\n            f.write('Line1\\nLine2\\nLine3')\n        with open(self.filename, 'r') as f:\n            lines = f.readlines()\n        return [line.strip() for line in lines if line.strip().startswith('Line')]\n\nmanager = FileManager('test_file.txt')\nprint(manager.process_file())\nos.remove('test_file.txt')\n```\n",
-		"hints": [
-			"The `process_file` method writes to the file, then reads from it and processes the lines.",
-			"The method uses `strip` and `startswith` to filter lines."
-		],
-		"options": {
-			"a": "['Line1', 'Line2']",
-			"b": "['Line1', 'Line2', 'Line3']",
-			"c": "['Line2', 'Line3']"
-		},
-		"answer": "b"
-	}
-  ],
-
-  "7": [
-	{
-	  "type": "multiple_choice",
-	  "question": "What does the following regular expression match?\n\n```python\nimport re\npattern = re.compile(r'\\d+')\nresult = pattern.match('abc123')\n```\n",
-	  "hints": [
-		"The pattern '\\d+' matches one or more digits."
-	  ],
-	  "options": {
-		"a": "123",
-		"b": "abc",
-		"c": "None"
-	  },
-	  "answer": "c"
-	},
-	{
-	  "type": "write_code",
-	  "question": "Write a regular expression that matches an email address and test it using the re module.",
-	  "hints": [
-		"Use the re module to compile and match the regular expression."
+		"Use `re.compile` to compile your regex."
 	  ],
 	  "test_cases": [
 		{
@@ -391,24 +300,6 @@
 	  "answer": "a"
 	},
 	{
-	  "type": "write_code",
-	  "question": "Write a Python class named 'Rectangle' that demonstrates encapsulation by using private variables for its width and height, and defines the getter and the setter. Also, include a method `area` to calculate the area of the rectangle.",
-	  "hints": [
-		"Use double underscores (__) to make variables private.",
-		"Include a method to calculate the area using the formula width * height."
-	  ],
-	  "test_cases": [
-		{
-		  "input": "rect = Rectangle(4, 5); print(rect.width); print(rect.height); rect.width = 6; rect.height = 7; print(rect.area())",
-		  "output": "6, 7, 42"
-		},
-		{
-		  "input": "rect = Rectangle(2, 3); print(rect.width); print(rect.height); rect.width = 5; rect.height = 10; print(rect.area())",
-		  "output": "5, 10, 50"
-		}
-	  ]
-	},
-	{
 	  "type": "multiple_choice",
 	  "question": "Which of the following is an example of encapsulation in Python?",
 	  "hints": [
@@ -446,8 +337,8 @@
 		"The get_uppercase_words method operates on the encapsulated _text attribute."
 	  ],
 	  "options": {
-		"a": "__init__ method",
-		"b": "get_uppercase_words method",
+		"a": "`__init__` method",
+		"b": "`get_uppercase_words` method",
 		"c": "split method"
 	  },
 	  "answer": "b"
@@ -531,11 +422,11 @@
 			],
 			"test_cases": [
 				{
-					"input": "processor = AdvancedNumberProcessor()\nlist(processor.process_numbers(3, cubes=False))",
+					"input": "list(AdvancedNumberProcessor().process_numbers(3, cubes=False))",
 					"output": "[1, 4, 9]"
 				},
 				{
-					"input": "processor = AdvancedNumberProcessor()\nlist(processor.process_numbers(3, cubes=True))",
+					"input": "list(AdvancedNumberProcessor().process_numbers(3, cubes=True))",
 					"output": "[1, 8, 27]"
 				}
 			]
