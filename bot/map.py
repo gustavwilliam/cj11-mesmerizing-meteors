@@ -62,7 +62,7 @@ class Map(discord.ui.View):
         if level is None:
             return "Press the arrow keys to move around."
 
-        return f"## {level.name}: {level.topic}\nPress {Emoji.CHECK} to start the level."
+        return f"## {level.name}: {level.topic}\nPress {Emoji.CHECK.value} to start the level."
 
     def update_buttons(self) -> None:
         """Update the buttons to match the current position."""
@@ -110,7 +110,7 @@ class Map(discord.ui.View):
         )
 
     @discord.ui.button(
-        emoji=discord.PartialEmoji.from_str(Emoji.ARROW_LEFT),
+        emoji=discord.PartialEmoji.from_str(Emoji.ARROW_LEFT.value),
         style=discord.ButtonStyle.primary,
         custom_id="button_left",
         row=2,
@@ -124,7 +124,7 @@ class Map(discord.ui.View):
         await self.move(interaction, x=-1)
 
     @discord.ui.button(
-        emoji=discord.PartialEmoji.from_str(Emoji.ARROW_UP),
+        emoji=discord.PartialEmoji.from_str(Emoji.ARROW_UP.value),
         style=discord.ButtonStyle.primary,
         custom_id="button_up",
     )
@@ -137,7 +137,7 @@ class Map(discord.ui.View):
         await self.move(interaction, y=-1)
 
     @discord.ui.button(
-        emoji=discord.PartialEmoji.from_str(Emoji.ARROW_RIGHT),
+        emoji=discord.PartialEmoji.from_str(Emoji.ARROW_RIGHT.value),
         style=discord.ButtonStyle.primary,
         custom_id="button_right",
     )
@@ -150,7 +150,7 @@ class Map(discord.ui.View):
         await self.move(interaction, x=1)
 
     @discord.ui.button(
-        emoji=discord.PartialEmoji.from_str(Emoji.ARROW_DOWN),
+        emoji=discord.PartialEmoji.from_str(Emoji.ARROW_DOWN.value),
         style=discord.ButtonStyle.primary,
         custom_id="button_down",
         row=2,
@@ -164,7 +164,7 @@ class Map(discord.ui.View):
         await self.move(interaction, y=1)
 
     @discord.ui.button(
-        emoji=discord.PartialEmoji.from_str(Emoji.CHECK),
+        emoji=discord.PartialEmoji.from_str(Emoji.CHECK.value),
         style=discord.ButtonStyle.success,
         custom_id="button_confirm",
         disabled=True,

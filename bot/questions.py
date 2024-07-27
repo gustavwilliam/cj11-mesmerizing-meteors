@@ -103,7 +103,7 @@ class QuestionView(View):
         self.status: QuestionStatus = QuestionStatus.IN_PROGRESS
 
     @discord.ui.button(
-        emoji=discord.PartialEmoji.from_str(Emoji.HINT),
+        emoji=discord.PartialEmoji.from_str(Emoji.HINT.value),
         label="Hint",
         row=2,
         style=discord.ButtonStyle.secondary,
@@ -120,7 +120,7 @@ class QuestionView(View):
 
     @discord.ui.button(
         label="Quit level",
-        emoji=discord.PartialEmoji.from_str(Emoji.CROSS),
+        emoji=discord.PartialEmoji.from_str(Emoji.CROSS.value),
         style=discord.ButtonStyle.secondary,
         row=2,
     )
@@ -203,7 +203,7 @@ class MultipleChoiceQuestionView(QuestionView):
             "f": Emoji.LETTER_F,
         }
         return discord.PartialEmoji.from_str(
-            ids[option_id],
+            ids[option_id].value,
         )
 
     def add_option_button(self, option_id: str, label: str) -> None:
