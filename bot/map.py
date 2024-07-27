@@ -3,8 +3,8 @@ import json
 from pathlib import Path
 
 import discord
-from controller import Controller
 from config import Emoji
+from controller import Controller
 from matplotlib import font_manager
 from PIL import Image, ImageDraw, ImageFont
 

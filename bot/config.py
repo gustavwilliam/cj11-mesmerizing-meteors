@@ -16,4 +16,4 @@ class Emoji(Enum):
     LETTER_C = "<:letter_c:1265996407647768716>"
     LETTER_D = "<:letter_d:1265996409040277595>"
     LETTER_E = "<:letter_e:1265996410453622945>"
-    LETTER_F = "<:letter_a:1265996405164474368>"
+    LETTER_F = "<:letter_f:1265996405164474368>"

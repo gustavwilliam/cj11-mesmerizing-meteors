@@ -5,10 +5,10 @@ from enum import Enum, auto
 from typing import Protocol
 
 import discord
+from config import Emoji
 from discord import Embed, Interaction, TextStyle
 from discord.ui.view import View
 from utils.eval import eval_python
-from config import Emoji
 
 if typing.TYPE_CHECKING:
     from levels import Level
@@ -200,7 +200,7 @@ class MultipleChoiceQuestionView(QuestionView):
             "c": Emoji.LETTER_C,
             "d": Emoji.LETTER_D,
             "e": Emoji.LETTER_E,
-            "f": Emoji.LETTER_F
+            "f": Emoji.LETTER_F,
         }
         return discord.PartialEmoji.from_str(
             ids[option_id],
