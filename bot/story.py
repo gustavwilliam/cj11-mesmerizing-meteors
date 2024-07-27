@@ -6,14 +6,21 @@ import discord
 class StoryPage:
     """A page in a story, with a title, description, and optional image."""
 
-    def __init__(self, title: str, description: str, image_path: Path | None = None) -> None:
+    def __init__(
+        self,
+        title: str,
+        description: str,
+        image_path: Path | None = None,
+        color: discord.Color = discord.Color.blurple(),  # noqa: B008
+    ) -> None:
         self.title = title
         self.description = description
         self.image_path = image_path
+        self.color = color
 
     def embed(self) -> discord.Embed:
         """Return an embed with the image."""
-        embed = discord.Embed(title=self.title, description=self.description)
+        embed = discord.Embed(title=self.title, description=self.description, color=self.color)
         if self.image_path:
             embed.set_image(url=f"attachment://{self.image_path.name}")
         return embed

@@ -143,7 +143,7 @@ class QuestionView(View):
     async def on_fail(self, interaction: discord.Interaction) -> None:
         """Execute when the user answers the question incorrectly."""
         self.status = QuestionStatus.INCORRECT
-        await interaction.response.send_message(content="Incorrect answer. Please try again.", ephemeral=True)
+        await interaction.followup.send(content="Incorrect answer. Please try again.", ephemeral=True)
 
 
 class MultipleChoiceQuestion(Question):
