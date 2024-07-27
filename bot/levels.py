@@ -7,6 +7,7 @@ from controller import Controller
 from discord import Interaction
 from map import Map, generate_map, image_to_discord_file
 from questions import Question, QuestionStatus, question_factory
+from story import StoryPage, StoryView
 
 with Path.open(Path("bot/questions.json")) as f:
     all_questions = json.load(f)
@@ -90,24 +91,61 @@ class Level(Protocol):
             )
             await question_view.wait()
             next_interaction = question_view.next_question_interaction
-            if question_view.status == QuestionStatus.EXITED:
-                self.on_failure()
-                break
             if next_interaction is None:
                 break
+            if question_view.status == QuestionStatus.EXITED:
+                break
         else:
-            self.on_success()
+            await self.on_success(next_interaction)
 
         if next_interaction is not None:
-            await self.return_to_map(interaction, map)
+            next_interaction = await self.return_to_map(interaction, map)
 
-    def on_failure(self) -> None:
+    async def on_failure(self, interaction: Interaction) -> Interaction:
         """Call when the player fails the level."""
-        print(self.name + " failed")  # Default implementation
+        story = StoryView(
+            pages=[
+                StoryPage(
+                    title="Level failed!",
+                    description="Try again and let's beat this level!.",
+                    image_path=Path("bot/assets/level-fail.png"),
+                    color=discord.Color.red(),
+                ),
+            ],
+        )
+        await interaction.edit_original_response(
+            embed=story.first_embed(),
+            attachments=story.first_attachments(),
+            view=story,
+        )
+        await story.wait()
+        if story.last_interaction is None:
+            raise ValueError
+        await story.last_interaction.response.defer()
+        return story.last_interaction
 
-    def on_success(self) -> None:
+    async def on_success(self, interaction: Interaction) -> Interaction:
         """Call when the player succeeds the level."""
-        print(self.name + " succeeded")  # Default implementation
+        story = StoryView(
+            pages=[
+                StoryPage(
+                    title="Level complete!",
+                    description="Well done completing the level.",
+                    image_path=Path("bot/assets/level-success.png"),
+                    color=discord.Color.green(),
+                ),
+            ],
+        )
+        await interaction.edit_original_response(
+            embed=story.first_embed(),
+            attachments=story.first_attachments(),
+            view=story,
+        )
+        await story.wait()
+        if story.last_interaction is None:
+            raise ValueError
+        await story.last_interaction.response.defer()
+        return story.last_interaction
 
 
 class Level1(Level):  # noqa: D101
