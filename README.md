@@ -1,4 +1,4 @@
-# [Project Name]
+# [Python Adventures]
 
 ![Alt title](bot/assets/title-art.png)
 
@@ -15,3 +15,4 @@ Python Adventures is a quiz game where you answer pythonic questions and gain re
 3. add or set `DISCORD_BOT_KEY=[your_bot_key]` with bot's key.
 
 4. You are ready to go!
+5. 
