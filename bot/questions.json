@@ -198,9 +198,9 @@
 		"The generator yields elements one by one, while the list comprehension returns a complete list."
 	  ],
 	  "options": {
-		"a": "[2, 4, 6]\n[6, 8, 10, 12]",
-		"b": "[2, 4, 6]\n[6, 8, 10]",
-		"c": "[2, 4, 6, 8, 10]\n[6, 8, 10]"
+		"a": "[2, 4, 6]  [6, 8, 10, 12]",
+		"b": "[2, 4, 6]  [6, 8, 10]",
+		"c": "[2, 4, 6, 8, 10]  [6, 8, 10]"
 	  },
 	  "answer": "b"
 	},
@@ -253,20 +253,6 @@
 	  "answer": "b"
 	},
 	{
-	  "type": "write_code",
-	  "question": "Write a Python function called `count_lines` that counts the number of lines in a file called 'document.txt'.",
-	  "hints": [
-		"Use the open function with the 'r' mode to read the file.",
-		"Use a loop or the readlines method to count the number of lines."
-	  ],
-	  "test_cases": [
-		{
-		  "input": "count_lines('document.txt')",
-		  "output": "The number of lines in the file."
-		}
-	  ]
-	},
-	{
 	  "type": "multiple_choice",
 	  "question": "Which mode should you use to open a file for both reading and writing?\n",
 	  "hints": [
@@ -278,6 +264,20 @@
 		"c": "r+"
 	  },
 	  "answer": "c"
+	},
+	{
+		"type": "multiple_choice",
+		"question": "What will be the output of the following code?\n\n```python\nimport os\n\nclass FileManager:\n    def __init__(self, filename):\n        self.filename = filename\n    def process_file(self):\n        with open(self.filename, 'w') as f:\n            f.write('Line1\\nLine2\\nLine3')\n        with open(self.filename, 'r') as f:\n            lines = f.readlines()\n        return [line.strip() for line in lines if line.strip().startswith('Line')]\n\nmanager = FileManager('test_file.txt')\nprint(manager.process_file())\nos.remove('test_file.txt')\n```\n",
+		"hints": [
+			"The `process_file` method writes to the file, then reads from it and processes the lines.",
+			"The method uses `strip` and `startswith` to filter lines."
+		],
+		"options": {
+			"a": "['Line1', 'Line2']",
+			"b": "['Line1', 'Line2', 'Line3']",
+			"c": "['Line2', 'Line3']"
+		},
+		"answer": "b"
 	}
   ],
 
@@ -299,17 +299,16 @@
 	  "type": "write_code",
 	  "question": "Write a regular expression that matches an email address and test it using the re module.",
 	  "hints": [
-		"An email address typically has the format 'name@domain.com'.",
 		"Use the re module to compile and match the regular expression."
 	  ],
 	  "test_cases": [
 		{
-		  "input": "pattern.match('test@example.com')",
-		  "output": "<re.Match object; span=(0, 16), match='test@example.com'>"
+		  "input": "bool(pattern.match('test@example.com'))",
+		  "output": "True"
 		},
 		{
-		  "input": "pattern.match('not-an-email')",
-		  "output": "None"
+		  "input": "bool(pattern.match('not-an-email'))",
+		  "output": "False"
 		}
 	  ]
 	},
@@ -347,7 +346,9 @@
 	  "question": "Write a Python class named 'Car' with an __init__ method that initializes the make and model of the car, and a method named 'description' that returns a string in the format 'Make: [make], Model: [model]'.",
 	  "hints": [
 		"Define the __init__ method to accept make and model as parameters.",
-		"The description method should return a formatted string using the instance variables."
+		"The description method should return a formatted string using the instance variables.",
+		"Do not include the `[` and `]` characters in your output",
+		"Check that the spacing in your output is exactly correct!"
 	  ],
 	  "test_cases": [
 		{
@@ -391,19 +392,18 @@
 	},
 	{
 	  "type": "write_code",
-	  "question": "Write a Python class named 'Rectangle' that demonstrates encapsulation by using private variables for its width and height, and provides public methods to get(`get_width`,`get_height`) and set these values(`set_width`, `set_height`). Also, include a method `area` to calculate the area of the rectangle.",
+	  "question": "Write a Python class named 'Rectangle' that demonstrates encapsulation by using private variables for its width and height, and defines the getter and the setter. Also, include a method `area` to calculate the area of the rectangle.",
 	  "hints": [
 		"Use double underscores (__) to make variables private.",
-		"Provide getter and setter methods to access and modify the private variables.",
 		"Include a method to calculate the area using the formula width * height."
 	  ],
 	  "test_cases": [
 		{
-		  "input": "rect = Rectangle(4, 5); rect.get_width(); rect.get_height(); rect.set_width(6); rect.set_height(7); rect.area()",
+		  "input": "rect = Rectangle(4, 5); print(rect.width); print(rect.height); rect.width = 6; rect.height = 7; print(rect.area())",
 		  "output": "6, 7, 42"
 		},
 		{
-		  "input": "rect = Rectangle(2, 3); rect.get_width(); rect.get_height(); rect.set_width(5); rect.set_height(10); rect.area()",
+		  "input": "rect = Rectangle(2, 3); print(rect.width); print(rect.height); rect.width = 5; rect.height = 10; print(rect.area())",
 		  "output": "5, 10, 50"
 		}
 	  ]
@@ -425,10 +425,10 @@
   "10": [
 	{
 	  "type": "multiple_choice",
-	  "question": "Consider the following Python code snippet:\n\n```python\nimport re\n\nclass LogAnalyzer:\n    def __init__(self, file_path):\n        self.__file_path = file_path\n        self.__lines = self.__read_file()\n\n    def __read_file(self):\n        with open(self.__file_path, 'r') as file:\n            return file.readlines()\n\n    def get_error_lines(self):\n        return [line for line in self.__lines if re.search(r'ERROR', line)]\n\nanalyzer = LogAnalyzer('log.txt')\nprint(analyzer.get_error_lines())\n```\n\nWhat will be the output if 'log.txt' contains lines with the word 'ERROR'?",
+	  "question": "Consider the following Python code snippet:\n\n```python\nimport re\n\nclass LogAnalyzer:\n    def __init__(self, file_path):\n        self._file_path = file_path\n        self._lines = self._read_file()\n\n    def _read_file(self):\n        with open(self._file_path, 'r') as file:\n            return file.readlines()\n\n    def get_error_lines(self):\n        return [line for line in self._lines if re.search(r'ERROR', line)]\n\nanalyzer = LogAnalyzer('log.txt')\nprint(analyzer.get_error_lines())\n```\n\nWhat will be the output if 'log.txt' contains lines with the word 'ERROR'?",
 	  "hints": [
 		"The class encapsulates file handling and uses a regular expression to find lines with 'ERROR'.",
-		"The __read_file method reads the file contents into a list of lines.",
+		"The _read_file method reads the file contents into a list of lines.",
 		"The get_error_lines method uses a list comprehension to filter lines containing 'ERROR'."
 	  ],
 	  "options": {
@@ -440,10 +440,10 @@
 	},
 	{
 	  "type": "multiple_choice",
-	  "question": "Which method demonstrates encapsulation in the following code snippet?\n\n```python\nclass TextProcessor:\n    def __init__(self, text):\n        self.__text = text\n\n    def get_uppercase_words(self):\n        return [word for word in self.__text.split() if word.isupper()]\n\nprocessor = TextProcessor('HELLO world PYTHON')\nprint(processor.get_uppercase_words())\n```\n",
+	  "question": "Which method demonstrates encapsulation in the following code snippet?\n\n```python\nclass TextProcessor:\n    def __init__(self, text):\n        self._text = text\n\n    def get_uppercase_words(self):\n        return [word for word in self._text.split() if word.isupper()]\n\nprocessor = TextProcessor('HELLO world PYTHON')\nprint(processor.get_uppercase_words())\n```\n",
 	  "hints": [
 		"Encapsulation involves hiding the internal state of the object.",
-		"The get_uppercase_words method operates on the encapsulated __text attribute."
+		"The get_uppercase_words method operates on the encapsulated _text attribute."
 	  ],
 	  "options": {
 		"a": "__init__ method",
@@ -454,7 +454,7 @@
 	},
 	{
 	  "type": "multiple_choice",
-	  "question": "What will the following code output if 'data.txt' contains the lines '123 ABC\\n456 DEF\\n789 GHI'?\n\n```python\nclass DataFilter:\n    def __init__(self, file_path):\n        self.__file_path = file_path\n\n    def filter_numeric_lines(self):\n        with open(self.__file_path, 'r') as file:\n            return [line for line in file if re.match(r'\\d+', line)]\n\nfilter = DataFilter('data.txt')\nprint(filter.filter_numeric_lines())\n```\n",
+	  "question": "What will the following code output if 'data.txt' contains the lines '123 ABC\\n456 DEF\\n789 GHI'?\n\n```python\nclass DataFilter:\n    def __init__(self, file_path):\n        self._file_path = file_path\n\n    def filter_numeric_lines(self):\n        with open(self._file_path, 'r') as file:\n            return [line for line in file if re.match(r'\\d+', line)]\n\nfilter = DataFilter('data.txt')\nprint(filter.filter_numeric_lines())\n```\n",
 	  "hints": [
 	  "The filter_numeric_lines method reads the file and uses a regular expression to filter lines starting with digits.",
 	  "List comprehension is used to create the list of matching lines."
@@ -468,7 +468,7 @@
 	},
 	{
 	  "type": "multiple_choice",
-	  "question": "What will be the output of the following code if the 'input.txt' file contains 'one1\\ntwo2\\nthree3\\n'?\n\n```python\nimport re\n\nclass WordExtractor:\n    def __init__(self, file_path):\n        self.__file_path = file_path\n\n    def extract_words(self):\n        with open(self.__file_path, 'r') as file:\n            return [re.sub(r'\\d+', '', line.strip()) for line in file]\n\nextractor = WordExtractor('input.txt')\nprint(extractor.extract_words())\n```\n",
+	  "question": "What will be the output of the following code if the 'input.txt' file contains 'one1\\ntwo2\\nthree3\\n'?\n\n```python\nimport re\n\nclass WordExtractor:\n    def __init__(self, file_path):\n        self._file_path = file_path\n\n    def extract_words(self):\n        with open(self._file_path, 'r') as file:\n            return [re.sub(r'\\d+', '', line.strip()) for line in file]\n\nextractor = WordExtractor('input.txt')\nprint(extractor.extract_words())\n```\n",
 	  "hints": [
 		"The extract_words method uses a regular expression to remove digits from each line.",
 		"List comprehension is used to create a list of cleaned lines."
