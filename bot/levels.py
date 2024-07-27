@@ -4,6 +4,7 @@ from typing import Protocol
 
 import discord
 from controller import Controller
+from database.models.player import Player, PlayerRepo
 from discord import File, Interaction
 from map import Map, generate_map, image_to_discord_file
 from questions import Question, QuestionStatus, question_factory
@@ -63,7 +64,8 @@ class Level(Protocol):
         img = image_to_discord_file(
             generate_map(
                 map.player.get_position(),
-                player_name=interaction.user.display_name,
+                player_username=interaction.user.name,
+                player_display_name=interaction.user.display_name,
             ),
             image_name := "image",
         )
@@ -86,8 +88,18 @@ class Level(Protocol):
             filename="hearts.png",  # Must be exactly this. Question.embed() depends on it
         )
 
+    def _level_unlocked(self, player: Player) -> bool:
+        """Return True if level is unlocked."""
+        level = [level for level in player.summary if level["lvl_id"] == self.id]
+        return level[0]["available"] if level else False
+
     async def run(self, interaction: Interaction, map: Map) -> None:
         """Run the level."""
+        player = PlayerRepo().get(interaction.user.name)
+        if not self._level_unlocked(player):
+            await interaction.response.send_message("Level not unlocked.", ephemeral=True)
+            return
+
         next_interaction = interaction
         await next_interaction.response.defer()
         for i, question in enumerate(self.questions):
@@ -109,9 +121,7 @@ class Level(Protocol):
                             break
                         await self.on_failure(next_interaction)
                         break
-            if next_interaction is None:
-                break
-            if question_view.status in [QuestionStatus.EXITED, QuestionStatus.INCORRECT]:
+            if next_interaction is None or question_view.status in [QuestionStatus.EXITED, QuestionStatus.INCORRECT]:
                 break
         else:
             await self.on_success(next_interaction)
@@ -144,6 +154,10 @@ class Level(Protocol):
 
     async def on_success(self, interaction: Interaction) -> Interaction:
         """Call when the player succeeds the level."""
+        player = PlayerRepo().get(interaction.user.name)
+        player.complete_level(level=self.id, score=self.hearts)
+        PlayerRepo().save(player)
+
         story = StoryView(
             pages=[
                 StoryPage(

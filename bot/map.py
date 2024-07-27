@@ -100,7 +100,11 @@ class Map(discord.ui.View):
         )
         embed.description = self.get_embed_description(self.player.get_position())
         img = image_to_discord_file(
-            generate_map(self.player.get_position(), player_name=self.user.display_name),
+            generate_map(
+                self.player.get_position(),
+                player_username=interaction.user.name,
+                player_display_name=self.user.display_name,
+            ),
             image_name := "image",
         )
         embed.set_image(url=f"attachment://{image_name}.png")
@@ -218,18 +222,19 @@ def image_to_discord_file(image: Image.Image, file_name: str = "image") -> disco
 def _crop_map(
     position: tuple[int, int],
     *,
+    map_name: str = "map-done-abc.png",
     offset: tuple[int, int] = (0, 0),
 ) -> Image.Image:
     """Crop the map so the camera centers on the given position, with the given offset.
 
     The function currently only supports the fully unlocked map.
     """
-    img = Image.open(path_maps / "map-done-abc.png")
+    img = Image.open(path_maps / map_name)
     box = get_camera_box(position, offset)
     return img.crop(box)
 
 
-def draw_player(position: tuple[int, int]) -> tuple[Image.Image, int]:
+def draw_player(position: tuple[int, int], map_name: str = "map-done-abc.png") -> tuple[Image.Image, int]:
     """Draw the player on the map centered on the given position.
 
     Returns the map with the player on it and the player's height.
@@ -237,7 +242,7 @@ def draw_player(position: tuple[int, int]) -> tuple[Image.Image, int]:
     player = Image.open(path_assets / "player.png").convert("RGBA")
     player_w, player_h = player.size
     offset = (0, round(-player_h / 2))
-    bg = _crop_map(position, offset=offset).convert("RGBA")
+    bg = _crop_map(position, offset=offset, map_name=map_name).convert("RGBA")
     bg.paste(
         player,
         (
@@ -287,11 +292,19 @@ def draw_name_box(bg: Image.Image, player_name: str, player_h: int) -> None:
     )
 
 
+def get_map_name(player_name: str) -> str:
+    """Get the file name for the map version that only has the player's levels unlocked."""
+    player = PlayerRepo().get(player_name)
+    file_name = "map-done" if player.max_level == 11 else f"map-lvl{player.next_level}"  # noqa: PLR2004, 11 is last level
+    return f"{file_name}.png"
+
+
 def generate_map(
     position: tuple[int, int],
     *,
+    player_username: str,
     with_player: bool = True,
-    player_name: str | None = None,
+    player_display_name: str | None = None,
 ) -> Image.Image:
     """Generate a map centered on the provided map coordinate.
 
@@ -303,11 +316,11 @@ def generate_map(
     so the player correctly stands on the point specified by MapPosition.
     """
     if not with_player:
-        return _crop_map(position)
-    bg, player_h = draw_player(position)
+        return _crop_map(position, map_name=get_map_name(player_username))
+    bg, player_h = draw_player(position, map_name=get_map_name(player_username))
 
-    if player_name is None:
+    if player_display_name is None:
         return bg
-    draw_name_box(bg, player_name, player_h)
+    draw_name_box(bg, player_display_name, player_h)
 
     return bg

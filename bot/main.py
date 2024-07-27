@@ -73,7 +73,8 @@ async def get_map(interaction: discord.Interaction) -> None:
     img = image_to_discord_file(
         generate_map(
             map_view.player.get_position(),
-            player_name=interaction.user.display_name,
+            player_username=interaction.user.name,
+            player_display_name=interaction.user.display_name,
         ),
         image_name := "image",
     )
