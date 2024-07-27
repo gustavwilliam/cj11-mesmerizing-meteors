@@ -1,51 +1,19 @@
-import re
 from enum import Enum
-from typing import Optional
 
 
 class Emoji(Enum):
     """Class to refactor custom emojis used in the server."""
 
-    CHECK = "check"
-    LEFT = "arrowleft"
-    RIGHT = "arrowright"
-    UP = "arrowup"
-    DOWN = "arrowdown"
-    HINT = "hint"
-    CROSS = "exit"
-    A = "letter_a"
-    B = "letter_b"
-    C = "letter_c"
-    D = "letter_d"
-    E = "letter_e"
-    F = "letter_f"
-
-    @classmethod
-    def from_pattern(cls, pattern: str) -> Optional["Emoji"]:
-        """Convert <:name:id> pattern to Emoji enum."""
-        match = re.match(r"<:(\w+):\d+>", pattern)
-        if match:
-            emoji_name = match.group(1)
-            return cls.get_enum_name(emoji_name)
-        return None
-
-    @classmethod
-    def get_enum_name(cls, name: str) -> Optional["Emoji"]:
-        """Get the Emoji enum member by its name."""
-        for emoji in cls:
-            if emoji.value == name:
-                return emoji
-        return None
-
-    @classmethod
-    def replace_custom_emojis(cls, text: str) -> str:
-        """Replace custom emojis in the text with Emoji enum names."""
-
-        def emoji_replacer(match: re.Match) -> str:
-            emoji = cls.from_pattern(match.group(0))
-            if emoji:
-                return f":{emoji.name}:"
-            return match.group(0)
-
-        emoji_pattern = re.compile(r"<:(\w+):\d+>")
-        return emoji_pattern.sub(emoji_replacer, text)
+    CHECK = "<:check:1265079659448766506>"
+    ARROW_LEFT = "<:arrowleft:1265077268951339081>"
+    ARROW_RIGHT = "<:arrowright:1265077270515552339>"
+    ARROW_UP = "<:arrowup:1265077271970975874>"
+    ARROW_DOWN = "<:arrowdown:1265077267965673587>"
+    HINT = " <:hint:1265996402891292675>"
+    CROSS = "<:exit:1265999816023080991>"
+    LETTER_A = "<:letter_a:1265996405164474368>"
+    LETTER_B = "<:letter_b:1265996406028636232>"
+    LETTER_C = "<:letter_c:1265996407647768716>"
+    LETTER_D = "<:letter_d:1265996409040277595>"
+    LETTER_E = "<:letter_e:1265996410453622945>"
+    LETTER_F = "<:letter_a:1265996405164474368>"

@@ -4,6 +4,7 @@ from pathlib import Path
 
 import discord
 from controller import Controller
+from config import Emoji
 from matplotlib import font_manager
 from PIL import Image, ImageDraw, ImageFont
 
@@ -61,7 +62,7 @@ class Map(discord.ui.View):
         if level is None:
             return "Press the arrow keys to move around."
 
-        return f"## {level.name}: {level.topic}\nPress <:check:1265079659448766506> to start the level."
+        return f"## {level.name}: {level.topic}\nPress {Emoji.CHECK} to start the level."
 
     def update_buttons(self) -> None:
         """Update the buttons to match the current position."""
@@ -109,7 +110,7 @@ class Map(discord.ui.View):
         )
 
     @discord.ui.button(
-        emoji=discord.PartialEmoji.from_str("<:arrowleft:1265077268951339081>"),
+        emoji=discord.PartialEmoji.from_str(Emoji.ARROW_LEFT),
         style=discord.ButtonStyle.primary,
         custom_id="button_left",
         row=2,
@@ -123,7 +124,7 @@ class Map(discord.ui.View):
         await self.move(interaction, x=-1)
 
     @discord.ui.button(
-        emoji=discord.PartialEmoji.from_str("<:arrowup:1265077271970975874>"),
+        emoji=discord.PartialEmoji.from_str(Emoji.ARROW_UP),
         style=discord.ButtonStyle.primary,
         custom_id="button_up",
     )
@@ -136,7 +137,7 @@ class Map(discord.ui.View):
         await self.move(interaction, y=-1)
 
     @discord.ui.button(
-        emoji=discord.PartialEmoji.from_str("<:arrowright:1265077270515552339>"),
+        emoji=discord.PartialEmoji.from_str(Emoji.ARROW_RIGHT),
         style=discord.ButtonStyle.primary,
         custom_id="button_right",
     )
@@ -149,7 +150,7 @@ class Map(discord.ui.View):
         await self.move(interaction, x=1)
 
     @discord.ui.button(
-        emoji=discord.PartialEmoji.from_str("<:arrowdown:1265077267965673587>"),
+        emoji=discord.PartialEmoji.from_str(Emoji.ARROW_DOWN),
         style=discord.ButtonStyle.primary,
         custom_id="button_down",
         row=2,
@@ -163,7 +164,7 @@ class Map(discord.ui.View):
         await self.move(interaction, y=1)
 
     @discord.ui.button(
-        emoji=discord.PartialEmoji.from_str("<:check:1265079659448766506>"),
+        emoji=discord.PartialEmoji.from_str(Emoji.CHECK),
         style=discord.ButtonStyle.success,
         custom_id="button_confirm",
         disabled=True,
