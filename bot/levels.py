@@ -176,9 +176,65 @@ class Level4(Level):  # noqa: D101
     map_position = (8, 0)
 
 
+class Level5(Level):  # noqa: D101
+    id = 5
+    name = "Level 5"
+    topic = "Rewind Showcase"
+    map_position = (10, 0)
+
+
+class Level6(Level):  # noqa: D101
+    id = 6
+    name = "Level 6"
+    topic = "File Handling"
+    map_position = (11, 1)
+
+
+class Level7(Level):  # noqa: D101
+    id = 7
+    name = "Level 7"
+    topic = "Regular Expressions"
+    map_position = (11, 3)
+
+
+class Level8(Level):  # noqa: D101
+    id = 8
+    name = "Level 8"
+    topic = "OOP (Part I)"
+    map_position = (11, 5)
+
+
+class Level9(Level):  # noqa: D101
+    id = 9
+    name = "Level 9"
+    topic = "OOP (Part II)"
+    map_position = (10, 6)
+
+
+class Level10(Level):  # noqa: D101
+    id = 10
+    name = "Level 10"
+    topic = "Quizmaster's Reflection"
+    map_position = (8, 6)
+
+
+class Level11(Level):  # noqa: D101
+    id = 11
+    name = "Level 11"
+    topic = "Final Insight Odyssey"
+    map_position = (6, 6)
+
+
 def register_all_levels() -> None:
     """Register all levels with the controller."""
     Level1.register()
     Level2.register()
     Level3.register()
     Level4.register()
+    Level5.register()
+    Level6.register()
+    Level7.register()
+    Level8.register()
+    Level9.register()
+    Level10.register()
+    Level11.register()
