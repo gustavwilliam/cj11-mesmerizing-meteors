@@ -1,7 +1,8 @@
 # [Project Name]
 
-[project description]
+![Alt title](bot/assets/title-art.png)
 
+Python Adventures is a quiz game where you answer pythonic questions and gain rewards.
 
 ## How to prepare the project?
 
