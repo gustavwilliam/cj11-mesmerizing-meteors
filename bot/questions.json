@@ -482,57 +482,63 @@
 	}
   ],
   "11": [
-	{
-	  "type": "multiple_choice",
-	  "question": "What will be the output of the following code?\n\n```python\nimport re\nclass BaseProcessor:\n    def __init__(self, filename):\n        self._filename = filename\n    def read_lines(self):\n        with open(self._filename, 'r') as file:\n            return [line.strip() for line in file]\nclass LogProcessor(BaseProcessor):\n    def find_errors(self):\n        lines = self.read_lines()\n        error_pattern = re.compile(r'ERROR: (.+)')\n        return [error_pattern.search(line).group(1) for line in lines if error_pattern.search(line)]\n\nwith open('log.txt', 'w') as f:\n    f.write('INFO: All systems operational\\nERROR: Disk space low\\nINFO: Backup completed\\nERROR: Network issue\\n')\n\nprocessor = LogProcessor('log.txt')\nprint(processor.find_errors())\n```\n",
-	  "hints": [
-		"The LogProcessor class inherits from BaseProcessor and adds functionality to find error messages using a regular expression."
-	  ],
-	  "options": {
-		"a": "['INFO: All systems operational', 'ERROR: Disk space low', 'INFO: Backup completed', 'ERROR: Network issue']",
-		"b": "['ERROR: Disk space low', 'ERROR: Network issue']",
-		"c": "['Disk space low', 'Network issue']"
-	  },
-	  "answer": "c"
-	},
-	{
-	  "type": "multiple_choice",
-	  "question": "Which of the following statements is true about the given code?\n\n```python\nclass FileHandler:\n    def __init__(self, filepath):\n        self.__filepath = filepath\n    def read_lines(self):\n        with open(self.__filepath, 'r') as file:\n            return [line.strip() for line in file]\n    def __iter__(self):\n        return iter(self.read_lines())\nclass RegexProcessor(FileHandler):\n    def __init__(self, filepath, pattern):\n        super().__init__(filepath)\n        self.pattern = re.compile(pattern)\n    def find_matches(self):\n        return [self.pattern.findall(line) for line in self]\n\nwith open('data.txt', 'w') as f:\n    f.write('abc 123\\ndef 456\\nghi 789\\n')\n\nprocessor = RegexProcessor('data.txt', r'\\d+')\nprint(processor.find_matches())\n```\n",
-	  "hints": [
-		"The RegexProcessor class inherits from FileHandler and adds functionality to find matches using a regular expression."
-	  ],
-	  "options": {
-		"a": "The method find_matches returns a single list containing all matches found in the file.",
-		"b": "The method find_matches returns a list of lists, where each sublist contains all matches found in a line.",
-		"c": "The method find_matches returns a dictionary with line numbers as keys and matches as values."
-	  },
-	  "answer": "b"
-	},
-	{
-	  "type": "multiple_choice",
-	  "question": "What does the following code do?\n\n```python\ndef ensure_positive(func):\n    def wrapper(*args, **kwargs):\n        result = func(*args, **kwargs)\n        if result < 0:\n            return 0\n        return result\n    return wrapper\n\nclass Calculator:\n    def __init__(self, value):\n        self.__value = value\n    @ensure_positive\n    def subtract(self, amount):\n        return self.__value - amount\n\ncalc = Calculator(10)\nprint(calc.subtract(15))\nprint(calc.subtract(5))\n```\n",
-	  "hints": [
-		"The ensure_positive decorator modifies the subtract method to ensure it never returns a negative result."
-	  ],
-		"options": {
-		"a": "-5\n5",
-		"b": "15\n5",
-		"c": "0\n5"
-	  },
-	  "answer": "c"
-	},
-	{
-	  "type": "multiple_choice",
-	  "question": "What will be the output of the following code?\n\n```python\nimport re\nclass TextProcessor:\n    def __init__(self, text):\n        self.__text = text\n    def find_numbers(self):\n        pattern = re.compile(r'\\d+')\n        return pattern.findall(self.__text)\n    def __iter__(self):\n        return iter(self.find_numbers())\nclass EnhancedProcessor(TextProcessor):\n    def __init__(self, text, prefix):\n        super().__init__(text)\n        self.prefix = prefix\n    def prefixed_numbers(self):\n        return [f'{self.prefix}{num}' for num in self]\n\nprocessor = EnhancedProcessor('Order 123 and 456 ready', 'ID-')\nprint(processor.prefixed_numbers())\n```\n",
-	  "hints": [
-		"The EnhancedProcessor class inherits from TextProcessor and adds functionality to prefix found numbers."
-	  ],
-	  "options": {
-		"a": "['Order ID-123 and ID-456 ready']",
-		"b": "['ID-123', 'ID-456']",
-		"c": "['ID-123', 'ID-456', 'Order', 'and', 'ready']"
-	  },
-	  "answer": "b"
-	}
+	  {
+			"type": "multiple_choice",
+			"question": "What will be the output of the following code?\n\n```python\nclass Base:\n    def __init__(self, value):\n        self.value = value\n    def display(self):\n        return f'Base: {self.value}'\n\nclass Derived(Base):\n    def display(self):\n        return f'Derived: {self.value}'\n\nobj = Derived(10)\nprint(obj.display())\n```\n",
+			"hints": [
+				"The Derived class overrides the display method of the Base class."
+			],
+			"options": {
+				"a": "Base: 10",
+				"b": "Derived: 10",
+				"c": "Error"
+			},
+			"answer": "b"
+		},
+		{
+			"type": "multiple_choice",
+			"question": "What is the output of the following code?\n\n```python\nclass Overloaded:\n    def func(self, a, b=None):\n        if b is None:\n            return a * 2\n        return a + b\n\nobj = Overloaded()\nprint(obj.func(3))\nprint(obj.func(3, 4))\n```\n",
+			"hints": [
+				"The method func is overloaded to handle cases with one or two arguments."
+			],
+			"options": {
+				"a": "6\n12",
+				"b": "Error",
+				"c": "6\n7"
+			},
+			"answer": "c"
+		},
+		{
+			"type": "multiple_choice",
+			"question": "Which statement is true about the following code?\n\n```python\ndef generator():\n    for i in range(3):\n        yield i * 2\n\nclass IterableGen:\n    def __iter__(self):\n        return generator()\n\nobj = IterableGen()\nresult = list(obj)\nprint(result)\n```\n",
+			"hints": [
+				"The IterableGen class makes use of a generator function to create an iterable."
+			],
+			"options": {
+				"a": "[0, 1, 2]",
+				"b": "[0, 2, 4]",
+				"c": "Error"
+			},
+			"answer": "b"
+		},
+		{
+			"type": "write_code",
+			"question": "Create a base class `NumberProcessor` with a generator that yields squares of numbers from 1 to n. Inherit from this class to create `AdvancedNumberProcessor` that overloads a method to yield cubes instead.",
+			"hints": [
+				"Use a generator in the base class to yield squares of numbers.",
+				"In the derived class, overload the method to yield cubes of numbers.",
+				"Implement method overloading to switch between squares and cubes."
+			],
+			"test_cases": [
+				{
+					"input": "processor = AdvancedNumberProcessor()\nlist(processor.process_numbers(3, cubes=False))",
+					"output": "[1, 4, 9]"
+				},
+				{
+					"input": "processor = AdvancedNumberProcessor()\nlist(processor.process_numbers(3, cubes=True))",
+					"output": "[1, 8, 27]"
+				}
+			]
+		}
   ]
 }

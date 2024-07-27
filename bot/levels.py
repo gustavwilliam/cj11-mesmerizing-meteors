@@ -179,7 +179,7 @@ class Level4(Level):  # noqa: D101
 class Level5(Level):  # noqa: D101
     id = 5
     name = "Level 5"
-    topic = "Review"
+    topic = "Rewind Showcase"
     map_position = (10, 0)
 
 
@@ -214,14 +214,14 @@ class Level9(Level):  # noqa: D101
 class Level10(Level):  # noqa: D101
     id = 10
     name = "Level 10"
-    topic = "Review"
+    topic = "Quizmaster's Reflection"
     map_position = (8, 6)
 
 
 class Level11(Level):  # noqa: D101
     id = 11
     name = "Level 11"
-    topic = "Farewell"
+    topic = "Final Insight Odyssey"
     map_position = (6, 6)
 
 
