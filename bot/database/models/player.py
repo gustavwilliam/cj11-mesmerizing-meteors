@@ -1,13 +1,19 @@
 from __future__ import annotations
 
-from typing import Protocol
+from typing import NamedTuple, Protocol
 
 from database.database import PlayerDetail
 
-LEVELS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, "A", "B", "C"]
-SPECIAL_LEVELS = ["A", "B", "C"]
-THRESHOLD_SCORE = 1
-MAX_LEVEL = 11
+LEVELS = [1, 2, 3, 4, 5, 6, 7, 8, "A", "B", "C"]
+SPECIAL_LEVELS = {"A": 9, "B": 10, "C": 11}
+MAX_LEVEL = 8
+
+
+class Position(NamedTuple):
+    """Holds coordinates Of User."""
+
+    x: int
+    y: int
 
 
 class PlayerDB(Protocol):
@@ -54,6 +60,17 @@ class PlayDetail:
             return self.score >= other.score
         return LEVELS.index(self.level) > LEVELS.index(other.level)
 
+    @property
+    def level_value(self) -> int | str:
+        """Return player level.
+
+        All levels are internally stored as integers (1-11).
+        Special levels 9 to 11 are presented as alphabets 'A' - 'C'
+        Calling `play.level` returns the right representation of the
+        play.
+        """
+        return SPECIAL_LEVELS.get(self.level) or self.level
+
     def as_dict(self) -> dict:
         """Represent play object as dictionary."""
         return {"username": self.username, "level": self.level, "score": self.score, "completed": self.completed}
@@ -83,8 +100,9 @@ class PlayHistory(list):
     def __contains__(self, item: str | PlayDetail) -> bool:
         if isinstance(item, str) and item.startswith("lvl"):
             level = item[3:]
-            level = level if level in SPECIAL_LEVELS else int(level)
-            return bool(any(play.level == level for play in self))
+            # get the integer value of level if it is a special level
+            level = SPECIAL_LEVELS.get(level) or int(level)
+            return bool(any(play.level_value == level for play in self))
 
         return super().__contains__(item)
 
@@ -96,12 +114,13 @@ class PlayHistory(list):
         >>> playhistory['lvl5' : 'lvl7'] # return plays with levels in [5,6,7]
         >>> playhistory['lvl7' : 'lvl2'] # returns an empty playhistory
         >>> playhistory[0] # normal indexing
-        >>> playhistory['lvlA' : 'lvlC'] # currently doesn't work!!!, would raise an Exception
+        >>> playhistory['lvlA' : 'lvlC'] # returns plays with levels in [A,B,C]
+        >>> playhistory['lvlA' : ] # currently doesn't work as expected!!!, would raise an Exception
         """
         if isinstance(index, str):
             if index.startswith("lvl"):
                 level = index[3:]
-                level = level if level in SPECIAL_LEVELS else int(level)
+                level = SPECIAL_LEVELS.get(level) or int(level)
                 return self._get_plays_by_level(level)
             error = f"Invalid string value: {index}"
             raise ValueError(error)
@@ -110,21 +129,24 @@ class PlayHistory(list):
             start, stop = index.start, index.stop
             if isinstance(start, str) and isinstance(stop, str):
                 if start.startswith("lvl") and stop.startswith("lvl"):
-                    start = int(start[3:])
-                    stop = int(stop[3:])
+                    start = SPECIAL_LEVELS.get(level) or int(start[3:])
+                    stop = SPECIAL_LEVELS.get(level) or int(stop[3:])
                     return self._get_plays_by_level(start=start, stop=stop)
                 error = "Invalid string slice object : {index}. Use slice(lvlid, lvlid)"
                 raise ValueError(error)
 
         return super().__getitem__(index)
 
-    def _get_plays_by_level(self, start: int | str, stop: int | None = None) -> PlayHistory:
+    def _get_plays_by_level(self, start: int, stop: int | None = None) -> PlayHistory:
         """Return plays for a given level or within a range of levels."""
         if stop is None:
-            return self.__class__([play for play in self if play.level == start])
+            return self.__class__([play for play in self if play.level_value == start], username=self.username)
 
         level_range = list(range(start, stop + 1))
-        return self.__class__(sorted([play for play in self if play.level in level_range]))
+        return self.__class__(
+            sorted([play for play in self if play.level_value in level_range]),
+            username=self.username,
+        )
 
     @property
     def max_level_played(self) -> PlayDetail:
@@ -152,12 +174,13 @@ class PlayHistory(list):
 class Player:
     """Object model for player."""
 
-    def __init__(self, username: str, details: list) -> None:
+    def __init__(self, username: str, details: list, coord: tuple | None = None) -> None:
         self.username = username
         self.history = PlayHistory([PlayDetail(**record) for record in details], username=username)
+        self.position = Position(coord) if coord else Position(0, 0)
 
     def __repr__(self) -> str:
-        return f"Player<username={self.username}>"
+        return f"Player<username={self.username} @ {self.position}>"
 
     @property
     def max_level(self) -> int:
@@ -179,11 +202,7 @@ class Player:
         unlocked_levels = []
         if "lvl4" in self.history:
             unlocked_levels.append("lvlA")
-        if "lvl11" in self.history:
-            unlocked_levels.append("lvl11")
-        if "lvlB" in self.history and max(self.history["lvlB"]).score > THRESHOLD_SCORE:
-            unlocked_levels.append("lvlC")
-
+        # logic for unlocking other special levels should be added here
         return unlocked_levels
 
     @property
@@ -225,6 +244,14 @@ class Player:
         play = PlayDetail(username=self.username, level=level, score=score, completed=True)
         self.history.append(play)
 
+    def set_position(self, x: int, y: int) -> None:
+        """Set player position."""
+        self.position = Position(x, y)
+
+    def get_position(self) -> Position:
+        """Return player position."""
+        return self.position
+
 
 class PlayerRepo:
     """Handles interaction between database and python models."""
@@ -235,7 +262,8 @@ class PlayerRepo:
     def get(self, username: str) -> Player:
         """Get player detail from database."""
         details = self.db.get(username)
-        return Player(username, details)
+        coordinate = self.db.get_map_coordinates(username)
+        return Player(username, details, coordinate)
 
     def save(self, player: Player) -> None:
         """Save player detail to database."""
@@ -243,3 +271,8 @@ class PlayerRepo:
         if data:
             data = tuple(data)
             self.db.insert_many(data)
+            # clear new_data after saving
+            player.new_data.clear()
+
+        coord_x, coord_y = player.get_position()
+        self.db.update_map_coordinates(player.username, coord_x, coord_y)

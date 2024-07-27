@@ -14,6 +14,12 @@ SCHEMA = """
         score INTEGER NON NULL DEFAULT 0,
         completed BOOLEAN NON NULL DEFAULT 1
     );
+
+    CREATE TABLE IF NOT EXISTS map(
+        username TEXT PRIMARY KEY,
+        coord_x INTEGER NON NULL,
+        coord_y INTEGER NON NULL
+    );
 """
 
 sqlite3.register_adapter(bool, int)
@@ -34,7 +40,8 @@ class Database:
         self.__connection.row_factory = sqlite3.Row
         self.__cursor = self.__connection.cursor()
 
-        self.execute_command(SCHEMA)
+        # initialize database
+        self.__cursor.executescript(SCHEMA)
 
     @property
     def connection(self) -> sqlite3.Connection:
@@ -126,3 +133,46 @@ class PlayerDetail(Database):
         with self.cursor as cursor:
             cursor.executemany(command, data)
         self.connection.commit()
+
+    def get_map_coordinates(self, username: str) -> tuple:
+        """Get map coordinate of user."""
+        with self.cursor as cursor:
+            cursor.execute(
+                """
+                SELECT coord_x, coord_y
+                FROM map
+                WHERE username = ?
+            """,
+                (username,),
+            )
+
+            return cursor.fetchone()
+
+    def update_map_coordinates(self, username: str, coord_x: int, coord_y: int) -> None:
+        """Update map coordinate of user."""
+        # check if user exists in database
+        with self.cursor as cursor:
+            cursor.execute(
+                """
+                SELECT username
+                FROM map
+                WHERE username = ?
+            """,
+                (username,),
+            )
+
+            user = cursor.fetchone()
+
+        if user is not None:
+            command = """
+                UPDATE map
+                SET coord_x = ?, coord_y = ?
+                WHERE username = ?
+            """
+        else:
+            command = """
+            INSERT INTO map(coord_x, coord_y, username)
+            VALUES (?,?,?);
+            """
+
+        self.execute_command(command, (coord_x, coord_y, username))
