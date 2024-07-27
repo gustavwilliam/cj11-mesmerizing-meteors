@@ -66,11 +66,15 @@ class Question(Protocol):
 
     def embed(self, level: "Level", question_index: int) -> Embed:
         """Return an embed message for the question."""
-        return Embed(
+        embed = Embed(
             title=f"{level.name}: {level.topic}",
             description=self.get_embed_description(question_index),
             color=discord.Color.blurple(),
         )
+        embed.set_thumbnail(
+            url="attachment://hearts.png",
+        )  # Must be exactly hearts.png. Level.get_hearts_file depends on it
+        return embed
 
     def view(self) -> "QuestionView":
         """Return the view for the question."""
@@ -144,7 +148,8 @@ class QuestionView(View):
     async def on_fail(self, interaction: discord.Interaction) -> None:
         """Execute when the user answers the question incorrectly."""
         self.status = QuestionStatus.INCORRECT
-        await interaction.followup.send(content="Incorrect answer. Please try again.", ephemeral=True)
+        self.next_question_interaction = interaction
+        self.stop()
 
 
 class MultipleChoiceQuestion(Question):
