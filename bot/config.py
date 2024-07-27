@@ -1,8 +1,11 @@
 import re
 from enum import Enum
+from typing import Optional
 
 
 class Emoji(Enum):
+    """Class to refactor custom emojis used in the server."""
+
     CHECK = "check"
     LEFT = "arrowleft"
     RIGHT = "arrowright"
@@ -18,20 +21,16 @@ class Emoji(Enum):
     F = "letter_f"
 
     @classmethod
-    def from_pattern(cls, pattern):
+    def from_pattern(cls, pattern: str) -> Optional["Emoji"]:
         """Convert <:name:id> pattern to Emoji enum."""
-
-        # Extract the emoji name from the pattern
-        match = re.match(r'<:(\w+):\d+>', pattern)
+        match = re.match(r"<:(\w+):\d+>", pattern)
         if match:
             emoji_name = match.group(1)
-            for emoji in cls:
-                if emoji.value == emoji_name:
-                    return emoji
+            return cls.get_enum_name(emoji_name)
         return None
 
     @classmethod
-    def get_enum_name(cls, name):
+    def get_enum_name(cls, name: str) -> Optional["Emoji"]:
         """Get the Emoji enum member by its name."""
         for emoji in cls:
             if emoji.value == name:
@@ -39,13 +38,14 @@ class Emoji(Enum):
         return None
 
     @classmethod
-    def replace_custom_emojis(cls, text):
+    def replace_custom_emojis(cls, text: str) -> str:
         """Replace custom emojis in the text with Emoji enum names."""
-        def emoji_replacer(match):
+
+        def emoji_replacer(match: re.Match) -> str:
             emoji = cls.from_pattern(match.group(0))
             if emoji:
                 return f":{emoji.name}:"
             return match.group(0)
 
-        emoji_pattern = re.compile(r'<:(\w+):\d+>')
+        emoji_pattern = re.compile(r"<:(\w+):\d+>")
         return emoji_pattern.sub(emoji_replacer, text)
