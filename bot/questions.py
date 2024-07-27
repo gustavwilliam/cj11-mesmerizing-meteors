@@ -5,6 +5,7 @@ from enum import Enum, auto
 from typing import Protocol
 
 import discord
+from config import Emoji
 from discord import Embed, Interaction, TextStyle
 from discord.ui.view import View
 from utils.eval import eval_python
@@ -102,7 +103,7 @@ class QuestionView(View):
         self.status: QuestionStatus = QuestionStatus.IN_PROGRESS
 
     @discord.ui.button(
-        emoji=discord.PartialEmoji.from_str("<:hint:1265996402891292675>"),
+        emoji=discord.PartialEmoji.from_str(Emoji.HINT.value),
         label="Hint",
         row=2,
         style=discord.ButtonStyle.secondary,
@@ -119,7 +120,7 @@ class QuestionView(View):
 
     @discord.ui.button(
         label="Quit level",
-        emoji=discord.PartialEmoji.from_str("<:exit:1265999816023080991>"),
+        emoji=discord.PartialEmoji.from_str(Emoji.CROSS.value),
         style=discord.ButtonStyle.secondary,
         row=2,
     )
@@ -194,15 +195,15 @@ class MultipleChoiceQuestionView(QuestionView):
     @staticmethod
     def _emoji(option_id: str) -> discord.PartialEmoji:
         ids = {
-            "a": "<:letter_a:1265996405164474368>",
-            "b": "<:letter_b:1265996406028636232>",
-            "c": "<:letter_c:1265996407647768716>",
-            "d": "<:letter_d:1265996409040277595>",
-            "e": "<:letter_e:1265996410453622945>",
-            "f": "<:letter_a:1265996405164474368>",
+            "a": Emoji.LETTER_A,
+            "b": Emoji.LETTER_B,
+            "c": Emoji.LETTER_C,
+            "d": Emoji.LETTER_D,
+            "e": Emoji.LETTER_E,
+            "f": Emoji.LETTER_F,
         }
         return discord.PartialEmoji.from_str(
-            ids[option_id],
+            ids[option_id].value,
         )
 
     def add_option_button(self, option_id: str, label: str) -> None:
