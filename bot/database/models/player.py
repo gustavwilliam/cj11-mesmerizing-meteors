@@ -177,7 +177,7 @@ class Player:
     def __init__(self, username: str, details: list, coord: tuple | None = None) -> None:
         self.username = username
         self.history = PlayHistory([PlayDetail(**record) for record in details], username=username)
-        self.position = Position(coord) if coord else Position(0, 0)
+        self.position = Position(*coord) if coord else Position(0, 0)
 
     def __repr__(self) -> str:
         return f"Player<username={self.username} @ {self.position}>"

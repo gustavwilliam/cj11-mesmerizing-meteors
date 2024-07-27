@@ -62,7 +62,7 @@ class Level(Protocol):
         """Return to the map after the level is exited."""
         img = image_to_discord_file(
             generate_map(
-                map.position,
+                map.player.get_position(),
                 player_name=interaction.user.display_name,
             ),
             image_name := "image",
@@ -76,7 +76,7 @@ class Level(Protocol):
         await interaction.edit_original_response(
             attachments=[img],
             embed=embed,
-            view=Map(map.position, interaction.user),
+            view=Map(interaction.user),
         )
 
     def get_hearts_file(self) -> File:

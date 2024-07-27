@@ -5,6 +5,7 @@ from pathlib import Path
 import discord
 from config import Emoji
 from controller import Controller
+from database.models.player import PlayerRepo
 from matplotlib import font_manager
 from PIL import Image, ImageDraw, ImageFont
 
@@ -33,10 +34,11 @@ def validate_coord(coord: tuple[int, int]) -> bool:
 class Map(discord.ui.View):
     """Allows the user to navigate the map."""
 
-    def __init__(self, position: tuple[int, int], user: discord.User | discord.Member) -> None:
+    def __init__(self, user: discord.User | discord.Member) -> None:
         super().__init__(timeout=180)
-        self.position = position
+        self.player = PlayerRepo().get(user.name)
         self.user = user
+        self.update_buttons()
 
     async def move(
         self,
@@ -45,10 +47,11 @@ class Map(discord.ui.View):
         y: int = 0,
     ) -> None:
         """Move the player to the new position."""
-        old_x, old_y = self.position
+        old_x, old_y = self.player.get_position()
         new_coord = old_x + x, old_y + y
         if validate_coord(new_coord):
-            self.position = new_coord
+            self.player.set_position(*new_coord)
+            PlayerRepo().save(self.player)
             await self.navigate(interaction)
         # If the new position is invalid, do nothing. Since the buttons are
         # disabled if the resulting move would be invalid, this should only
@@ -70,7 +73,7 @@ class Map(discord.ui.View):
         def should_disable(x: int, y: int) -> bool:
             return not validate_coord((x, y))
 
-        x, y = self.position
+        x, y = self.player.get_position()
         for child in self.children:
             if not isinstance(child, discord.ui.Button):
                 continue
@@ -83,7 +86,7 @@ class Map(discord.ui.View):
             if child.custom_id == "button_right":
                 child.disabled = should_disable(x + 1, y)
             if child.custom_id == "button_confirm":
-                child.disabled = not Controller().is_level(self.position)
+                child.disabled = not Controller().is_level(self.player.get_position())
 
     async def navigate(
         self,
@@ -95,9 +98,9 @@ class Map(discord.ui.View):
             title=f"\U0001f5fa {self.user.display_name}'s Map",
             color=discord.Color.blurple(),
         )
-        embed.description = self.get_embed_description(self.position)
+        embed.description = self.get_embed_description(self.player.get_position())
         img = image_to_discord_file(
-            generate_map(self.position, player_name=self.user.display_name),
+            generate_map(self.player.get_position(), player_name=self.user.display_name),
             image_name := "image",
         )
         embed.set_image(url=f"attachment://{image_name}.png")
@@ -175,7 +178,7 @@ class Map(discord.ui.View):
         _: discord.ui.Button,
     ) -> None:
         """Confirm/select on the map."""
-        level = Controller().get_level(self.position)
+        level = Controller().get_level(self.player.get_position())
         if level is not None:
             await level().run(interaction=interaction, map=self)
 
