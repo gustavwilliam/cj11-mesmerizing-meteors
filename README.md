@@ -11,7 +11,7 @@ A Discord API Token is a unique identifier used to authenticate requests to the 
 
 ## How to Obtain a Discord API Token
 1. Create a New Application:
-  - Go to the ***Discord Developer Portal***
+  - Go to the [***Discord Developer Portal***](https://discord.com/developers/applications)
   -  Click on ***New Application***
   -   Give your application a name and click **Create**.
 
@@ -23,7 +23,7 @@ A Discord API Token is a unique identifier used to authenticate requests to the 
    - Under the "TOKEN" section, click "Copy" to copy your bot's token.
    - Keep this token secure and never share it publicly. If your token is exposed, you should regenerate it immediately.
 
-For more information, Consult The [Discord Developer Portal](https://discord.com/developers/docs/intro)
+For more information, Consult The [Discord Developer Portal](https://discord.com/developers/docs/intro) Documentation.
 
 ## Installation and Setup
 To get your Discord bot up and running, follow these steps:
@@ -36,7 +36,7 @@ To get your Discord bot up and running, follow these steps:
 Ensure you have `python` installed then install dependencies by `pip install -r requirements.txt`
 
 3. **Set Up Your Environment Variables**:
-   > Create a .env file in the root of your project and add your Discord API Token: `DISCORD_BOT_KEY="your-discord-token-here"`
+   - Create a .env file in the root of your project and add your Discord API Token: `DISCORD_BOT_KEY="your-discord-token-here"`
 
 4. **Run the Bot**: `python bot/main.py`
 
