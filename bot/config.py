@@ -2,7 +2,7 @@ from enum import Enum
 
 
 class Emoji(Enum):
-    """Class to refactor custom emojis used in the server."""
+    """Configuration for custom Emojis."""
 
     CHECK = "<:check:1265079659448766506>"
     ARROW_LEFT = "<:arrowleft:1265077268951339081>"
