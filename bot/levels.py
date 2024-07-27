@@ -4,7 +4,7 @@ from typing import Protocol
 
 import discord
 from controller import Controller
-from discord import Interaction
+from discord import File, Interaction
 from map import Map, generate_map, image_to_discord_file
 from questions import Question, QuestionStatus, question_factory
 from story import StoryPage, StoryView
@@ -32,6 +32,7 @@ class Level(Protocol):
     topic: str
     map_position: tuple[int, int]
     questions: list[Question]
+    hearts: int = 3
 
     @classmethod
     def register(cls) -> None:
@@ -78,22 +79,39 @@ class Level(Protocol):
             view=Map(map.position, interaction.user),
         )
 
+    def get_hearts_file(self) -> File:
+        """Return the path to the hearts image file."""
+        return File(
+            Path(f"bot/assets/hearts_{self.hearts}.png"),
+            filename="hearts.png",  # Must be exactly this. Question.embed() depends on it
+        )
+
     async def run(self, interaction: Interaction, map: Map) -> None:
         """Run the level."""
         next_interaction = interaction
         await next_interaction.response.defer()
         for i, question in enumerate(self.questions):
-            question_view = question.view()
-            await next_interaction.edit_original_response(
-                embed=question.embed(level=self, question_index=i + 1),
-                view=question_view,
-                attachments=[],
-            )
-            await question_view.wait()
-            next_interaction = question_view.next_question_interaction
+            while next_interaction is not None:
+                question_view = question.view()
+                await next_interaction.edit_original_response(
+                    embed=question.embed(level=self, question_index=i + 1),
+                    view=question_view,
+                    attachments=[self.get_hearts_file()],
+                )
+                await question_view.wait()
+                next_interaction = question_view.next_question_interaction
+                if question_view.status in [QuestionStatus.EXITED, QuestionStatus.CORRECT]:
+                    break
+                if question_view.status == QuestionStatus.INCORRECT:
+                    self.hearts -= 1
+                    if self.hearts == 0:
+                        if next_interaction is None:
+                            break
+                        await self.on_failure(next_interaction)
+                        break
             if next_interaction is None:
                 break
-            if question_view.status == QuestionStatus.EXITED:
+            if question_view.status in [QuestionStatus.EXITED, QuestionStatus.INCORRECT]:
                 break
         else:
             await self.on_success(next_interaction)
@@ -106,8 +124,8 @@ class Level(Protocol):
         story = StoryView(
             pages=[
                 StoryPage(
-                    title="Level failed!",
-                    description="Try again and let's beat this level!.",
+                    title="No lives left",
+                    description="Try again and let's beat this level!",
                     image_path=Path("bot/assets/level-fail.png"),
                     color=discord.Color.red(),
                 ),
