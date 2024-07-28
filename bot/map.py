@@ -8,6 +8,7 @@ from controller import Controller
 from database.models.player import PlayerRepo
 from matplotlib import font_manager
 from PIL import Image, ImageDraw, ImageFont
+from utils.view import UserOnlyView
 
 path_bot = Path("bot")
 path_assets = path_bot / "assets"
@@ -31,11 +32,11 @@ def validate_coord(coord: tuple[int, int]) -> bool:
     return not (map_z.get(str(coord[0])) is None or map_z[str(coord[0])].get(str(coord[1])) is None)
 
 
-class Map(discord.ui.View):
+class Map(UserOnlyView):
     """Allows the user to navigate the map."""
 
     def __init__(self, user: discord.User | discord.Member) -> None:
-        super().__init__(timeout=180)
+        super().__init__(original_user=user)
         self.player = PlayerRepo().get(user.name)
         self.user = user
         self.update_buttons()

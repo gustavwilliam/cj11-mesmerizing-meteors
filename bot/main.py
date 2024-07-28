@@ -58,6 +58,7 @@ async def get_map(interaction: discord.Interaction) -> None:
                 Path("bot/assets/title-art.png"),
             ),
         ],
+        user=interaction.user,
     )
     await interaction.followup.send(
         embed=story.first_embed(),

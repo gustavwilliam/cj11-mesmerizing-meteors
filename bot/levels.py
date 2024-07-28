@@ -112,7 +112,7 @@ class Level(Protocol):
         await next_interaction.response.defer()
         for i, question in enumerate(self.questions):
             while next_interaction is not None:
-                question_view = question.view()
+                question_view = question.view(interaction.user)
                 await next_interaction.edit_original_response(
                     embed=question.embed(level=self, question_index=i + 1),
                     view=question_view,
@@ -149,6 +149,7 @@ class Level(Protocol):
                 ),
             ],
             continue_button_style=discord.ButtonStyle.danger,
+            user=interaction.user,
         )
         await interaction.edit_original_response(
             embed=story.first_embed(),
@@ -185,6 +186,7 @@ class Level(Protocol):
         story = StoryView(
             pages=[self._success_page(), *(self._success_more_pages())],
             continue_button_style=discord.ButtonStyle.success,
+            user=interaction.user,
         )
         await interaction.edit_original_response(
             embed=story.first_embed(),

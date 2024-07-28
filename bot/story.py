@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import discord
+from utils.view import UserOnlyView
 
 
 class StoryPage:
@@ -32,15 +33,16 @@ class StoryPage:
         return [discord.File(self.image_path, filename=self.image_path.name)]
 
 
-class StoryView(discord.ui.View):
+class StoryView(UserOnlyView):
     """Story pages, with an image/text in an embed, allowing the user to continue."""
 
     def __init__(
         self,
         pages: list[StoryPage],
+        user: discord.User | discord.Member,
         continue_button_style: discord.ButtonStyle = discord.ButtonStyle.primary,
     ) -> None:
-        super().__init__()
+        super().__init__(original_user=user)
         if len(pages) < 1:
             raise ValueError
         self.pages = pages

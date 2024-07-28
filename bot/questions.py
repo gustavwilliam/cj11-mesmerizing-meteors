@@ -7,8 +7,8 @@ from typing import Protocol
 import discord
 from config import Emoji
 from discord import Embed, Interaction, TextStyle
-from discord.ui.view import View
 from utils.eval import eval_python
+from utils.view import UserOnlyView
 
 if typing.TYPE_CHECKING:
     from levels import Level
@@ -76,12 +76,12 @@ class Question(Protocol):
         )  # Must be exactly hearts.png. Level.get_hearts_file depends on it
         return embed
 
-    def view(self) -> "QuestionView":
+    def view(self, user: discord.User | discord.Member) -> "QuestionView":
         """Return the view for the question."""
         if self.type == "multiple_choice":
-            return MultipleChoiceQuestionView(self)  # type: ignore  # noqa: PGH003
-        if self.type == "write_code":
-            return WriteCodeQuestionView(self)  # type: ignore  # noqa: PGH003
+            return MultipleChoiceQuestionView(self, user)  # type: ignore  # noqa: PGH003
+        if self.type in ["write_code", "write_golf_code"]:
+            return WriteCodeQuestionView(self, user)  # type: ignore  # noqa: PGH003
         raise ValueError
 
 
@@ -94,14 +94,14 @@ class QuestionStatus(Enum):
     EXITED = auto()
 
 
-class QuestionView(View):
+class QuestionView(UserOnlyView):
     """View for a question.
 
     The view contains buttons for the user to interact with the question.
     """
 
-    def __init__(self, question: Question) -> None:
-        super().__init__()
+    def __init__(self, question: Question, user: discord.User | discord.Member) -> None:
+        super().__init__(original_user=user)
         self.question = question
         self.next_question_interaction: Interaction | None = None
         self.status: QuestionStatus = QuestionStatus.IN_PROGRESS
@@ -191,8 +191,8 @@ class MultipleChoiceQuestionView(QuestionView):
     The view contains buttons for the user to select the answer.
     """
 
-    def __init__(self, question: MultipleChoiceQuestion) -> None:
-        super().__init__(question)
+    def __init__(self, question: MultipleChoiceQuestion, user: discord.User | discord.Member) -> None:
+        super().__init__(question, user)
         self.question = question
         for option_id, label in question.options.items():
             self.add_option_button(option_id, label)
@@ -397,8 +397,8 @@ class WriteCodeQuestionView(QuestionView):
     The view contains a text box for the user to write code.
     """
 
-    def __init__(self, question: WriteCodeQuestion) -> None:
-        super().__init__(question)
+    def __init__(self, question: WriteCodeQuestion, user: discord.User | discord.Member) -> None:
+        super().__init__(question, user)
         self.question = question
         self.post_modal_interaction: Interaction
 
