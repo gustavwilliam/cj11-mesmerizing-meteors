@@ -328,6 +328,45 @@ class WriteCodeQuestion(Question):
         )
 
 
+class WriteGolfCodeQuestion(WriteCodeQuestion):
+    """A type of Level where the user writes code to solve a problem in the fewest characters possible."""
+
+    def __init__(  # noqa: PLR0913, RUF100
+        self,
+        question: str,
+        hints: list[str],
+        test_cases: list[dict[str, str]],
+        max_characters: int,
+        pre_code: str | None = None,
+    ) -> None:
+        self.type = "write_code"
+        self.question = question
+        self.hints = hints
+        self.pre_code = pre_code
+        self.unlocked_hints = 0
+        self.max_characters = max_characters
+        self.test_cases = test_cases
+
+    async def check_response(self, code: str) -> bool:
+        """Check if the code answer is correct.
+
+        Runs a suite of unit tests on the code. If they all pass, the code is deemed correct.
+
+        Raises an error if a connection to the code evaluation service fails.
+        """
+        test_string = self._get_test_string(code)
+        output = await eval_python(test_string)
+        passes_tests = bool(check_test.search(output))
+        return passes_tests and len(code) <= self.max_characters
+
+    def get_embed_description(self, question_index: int) -> str:  # noqa: D102
+        return (
+            super(WriteCodeQuestion, self).get_embed_description(question_index)
+            + f"\n### Maximum characters allowed: {self.max_characters}\n"
+            + "\n*Tip: press the Code Playground button to try out your code before submitting!*"
+        )
+
+
 class CodeModal(discord.ui.Modal, title="Submit code"):
     """Modal for submitting code."""
 
@@ -421,5 +460,7 @@ def question_factory(**question_data) -> Question:  # noqa: ANN003
             return MultipleChoiceQuestion(**question_data)
         case "write_code":
             return WriteCodeQuestion(**question_data)
+        case "write_golf_code":
+            return WriteGolfCodeQuestion(**question_data)
         case _:
             raise ValueError

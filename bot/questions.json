@@ -521,5 +521,28 @@
         }
       ]
 		}
+  ],
+  "12": [
+	{
+		"type": "write_golf_code",
+		"question": "Golf the following code to return the sum of squares of a list of integers.\n```python\ndef sum_of_squares(nums):\n    result = 0\n    for num in nums:\n        result += num ** 2\n    return result\n```",
+		"hints": [
+			"Remove any spaces that aren't strictly necessary.",
+			"Use built-in functions to minimize code length.",
+			"Use a single line list comprehension.",
+			"Remember -- it only has to work. It doesn't have to be readable!"
+		],
+		"test_cases": [
+			{
+				"input": "sum_of_squares([1, 2, 3, 4])",
+				"output": "30"
+			},
+			{
+				"input": "sum_of_squares([0, 5, 10])",
+				"output": "125"
+			}
+		],
+		"max_characters": 45
+	}
   ]
 }
