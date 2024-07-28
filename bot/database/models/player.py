@@ -29,7 +29,7 @@ class PlayerDB(Protocol):
 class PlayDetail:
     """Class model for play session."""
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         username: str,
         level: int,
