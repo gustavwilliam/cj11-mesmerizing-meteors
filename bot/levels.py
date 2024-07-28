@@ -90,8 +90,8 @@ class Level(Protocol):
 
     def _level_unlocked(self, player: Player) -> bool:
         """Return True if level is unlocked."""
-        level = [level for level in player.summary if level["lvl_id"] == self.id]
-        return level[0]["available"] if level else False
+        level = player.history.summary()
+        return any(run["available"] for run in level if run["lvl_id"] == self.id) if level else False
 
     async def run(self, interaction: Interaction, map: Map) -> None:
         """Run the level."""
@@ -152,12 +152,33 @@ class Level(Protocol):
         await story.last_interaction.response.defer()
         return story.last_interaction
 
+    async def _success_story(self, interaction: Interaction) -> Interaction:
+        story = StoryView(
+            pages=[
+                StoryPage(
+                    title="Level complete!",
+                    description="Well done completing the level.",
+                    image_path=Path("bot/assets/level-success.png"),
+                    color=discord.Color.green(),
+                ),
+            ],
+        )
+        await interaction.edit_original_response(
+            embed=story.first_embed(),
+            attachments=story.first_attachments(),
+            view=story,
+        )
+        await story.wait()
+        if story.last_interaction is None:
+            raise ValueError
+        await story.last_interaction.response.defer()
+        return story.last_interaction
+
     async def on_success(self, interaction: Interaction) -> Interaction:
         """Call when the player succeeds the level."""
         player = PlayerRepo().get(interaction.user.name)
         player.complete_level(level=self.id, score=self.hearts)
         PlayerRepo().save(player)
-
         story = StoryView(
             pages=[
                 StoryPage(
@@ -206,6 +227,13 @@ class Level4(Level):  # noqa: D101
     name = "Level 4"
     topic = "Function overloading"
     map_position = (8, 0)
+
+    async def on_success(self, interaction: Interaction[discord.Client]) -> Interaction:
+        """Unlock special level A."""
+        player = PlayerRepo().get(interaction.user.name)
+        player.unlock_level(level=12)
+        PlayerRepo().save(player)
+        return await super().on_success(interaction)
 
 
 class Level5(Level):  # noqa: D101
@@ -256,12 +284,40 @@ class Level11(Level):  # noqa: D101
     topic = "Final Insight Odyssey"
     map_position = (6, 6)
 
+    async def on_success(self, interaction: Interaction[discord.Client]) -> Interaction:
+        """Unlock special level B."""
+        player = PlayerRepo().get(interaction.user.name)
+        player.unlock_level(level=13)
+        PlayerRepo().save(player)
+        return await super().on_success(interaction)
+
 
 class LevelA(Level):  # noqa: D101
     id = 12
     name = "Level A"
-    topic = "Code Golfing"
+    topic = "Code Golf Apprentice"
     map_position = (8, -2)
+
+
+class LevelB(Level):  # noqa: D101
+    id = 13
+    name = "Level B"
+    topic = "Code Golf Journeyman"
+    map_position = (12, 1)
+
+    async def on_success(self, interaction: Interaction[discord.Client]) -> Interaction:
+        """Unlock special level C."""
+        player = PlayerRepo().get(interaction.user.name)
+        player.unlock_level(level=14)
+        PlayerRepo().save(player)
+        return await super().on_success(interaction)
+
+
+class LevelC(Level):  # noqa: D101
+    id = 14
+    name = "Level C"
+    topic = "Code Golf Master"
+    map_position = (13, 4)
 
 
 def register_all_levels() -> None:
@@ -278,3 +334,5 @@ def register_all_levels() -> None:
     Level10.register()
     Level11.register()
     LevelA.register()
+    LevelB.register()
+    LevelC.register()
