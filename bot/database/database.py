@@ -134,7 +134,7 @@ class PlayerDetail(Database):
             cursor.executemany(command, data)
         self.connection.commit()
 
-    def get_map_coordinates(self, username: str) -> tuple | None:
+    def get_map_coordinates(self, username: str) -> tuple:
         """Get map coordinate of user."""
         with self.cursor as cursor:
             cursor.execute(
@@ -146,10 +146,7 @@ class PlayerDetail(Database):
                 (username,),
             )
 
-            row = cursor.fetchone()
-            if row:
-                return row["coord_x"], row["coord_y"]
-            return None
+            return cursor.fetchone()
 
     def update_map_coordinates(self, username: str, coord_x: int, coord_y: int) -> None:
         """Update map coordinate of user."""

@@ -215,7 +215,7 @@ class Player:
         )
 
         # If summary does not include completed special levels, add uncompleted but available special levels
-        special_levels = set(self.history.get_plays_by_level(start=12, stop=14))
+        special_levels = set(self.history.get_plays_by_level(start=12))
         for special in special_levels:
             if special.completed:
                 continue
