@@ -313,14 +313,14 @@ class Level11(Level):  # noqa: D101
 class LevelA(Level):  # noqa: D101
     id = 12
     name = "Level A"
-    topic = "Code Golf Apprentice"
+    topic = "Quadratic Quest"
     map_position = (8, -2)
 
 
 class LevelB(Level):  # noqa: D101
     id = 13
     name = "Level B"
-    topic = "Code Golf Journeyman"
+    topic = "Fusion Master"
     map_position = (12, 1)
 
     async def on_success(self, interaction: Interaction[discord.Client]) -> Interaction:
@@ -346,7 +346,7 @@ class LevelB(Level):  # noqa: D101
 class LevelC(Level):  # noqa: D101
     id = 14
     name = "Level C"
-    topic = "Code Golf Master"
+    topic = "Final Frontier"
     map_position = (13, 4)
 
     def _success_page(self) -> StoryPage:
