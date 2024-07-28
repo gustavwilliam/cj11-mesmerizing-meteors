@@ -105,7 +105,7 @@ class Level(Protocol):
         """Run the level."""
         player = PlayerRepo().get(interaction.user.name)
         if not self._level_unlocked(player):
-            await interaction.response.send_message("Level not unlocked.", ephemeral=True)
+            await interaction.response.send_message("Level is locked. Keep playing to unlock it!", ephemeral=True)
             return
 
         next_interaction = interaction

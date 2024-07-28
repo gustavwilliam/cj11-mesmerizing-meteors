@@ -8,7 +8,6 @@ from discord.ext import commands
 from dotenv import load_dotenv
 from levels import register_all_levels
 from map import Map, generate_map, image_to_discord_file
-from paginator import Paginator
 from story import StoryPage, StoryView
 from utils.eval import eval_python
 
@@ -23,27 +22,7 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 @bot.tree.command(name="ping", description="Test command!")
 async def merhaba(interaction: discord.Interaction) -> None:
     """Test command."""
-    print(interaction.response)
-    print(dir(interaction.response))
-    await interaction.response.send_message(f"Pong! {interaction.user.display_name}")
-
-
-# Embed message slash command
-@bot.tree.command(
-    name="pages",
-    description="""
-                  This command sends the embed message containing the pages!
-                  """,
-)
-async def embed_command(interaction: discord.Interaction) -> None:
-    """Send the embed message containing the pages."""
-    pages = [
-        discord.Embed(title="Page 1", description="This is a page 1"),
-        discord.Embed(title="Page 2", description="This is a page 2"),
-        discord.Embed(title="Page 3", description="This is a page 3"),
-    ]
-    paginator = Paginator(pages)
-    await interaction.response.send_message(embed=pages[0], view=paginator)
+    await interaction.response.send_message(f"Pong! {interaction.user.display_name}", ephemeral=True)
 
 
 @bot.tree.command(name="play", description="Start the Python Adventures game!")
@@ -122,17 +101,6 @@ async def eval_code(interaction: discord.Interaction, *, code: str) -> None:
         ),
         ephemeral=True,  # To not drown the channel with eval, since the game map would be lost
     )
-
-
-@bot.tree.command(name="complete", description="complete level")
-async def complete_level(interaction: discord.Interaction, level: int) -> None:
-    """Complete a level."""
-    level_object = Controller().get_level_by_id(level)
-    if level_object is None:
-        await interaction.response.send_message("Level not found.", ephemeral=True)
-        return
-    await interaction.response.defer(ephemeral=True, thinking=False)
-    await level_object().on_success(interaction=interaction)
 
 
 # Bot ready message
