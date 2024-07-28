@@ -342,12 +342,14 @@ class WriteGolfCodeQuestion(WriteCodeQuestion):
         test_cases: list[dict[str, str]],
         max_characters: int,
         pre_code: str | None = None,
+        pre_submit_code: str | None = None,
     ) -> None:
         self.type = "write_code"
         self.question = question
         self.hints = hints
-        self.pre_code = pre_code
+        self.pre_submit_code = pre_submit_code
         self.unlocked_hints = 0
+        self.pre_code = pre_code
         self.max_characters = max_characters
         self.test_cases = test_cases
 
@@ -445,7 +447,6 @@ class WriteCodeQuestionView(QuestionView):
         await modal.submit_interaction.response.defer(thinking=True, ephemeral=True)
         code_input = (self.question.pre_code or "") + "\n" + modal.code_input.value
         output = await eval_python(code_input)
-        print("Output: ", output)
         output = output[:1900] if len(output) > 0 and output != "\n" else "No output"
         embed = Embed(
             title="Code Playground Results",

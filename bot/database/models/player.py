@@ -52,16 +52,12 @@ class PlayDetail:
 
     def __gt__(self, other: PlayDetail) -> bool:
         if self.level == other.level:
-            if self.completed == other.completed:
-                return self.score > other.score
-            return self.completed > self.completed
+            return self.score > other.score
         return LEVELS.index(self.level) > LEVELS.index(other.level)
 
     def __ge__(self, other: PlayDetail) -> bool:
         if self.level == other.level:
-            if self.completed == other.completed:
-                return self.score >= other.score
-            return self.completed >= self.completed
+            return self.score >= other.score
         return LEVELS.index(self.level) >= LEVELS.index(other.level)
 
     @property

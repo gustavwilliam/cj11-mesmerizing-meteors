@@ -98,7 +98,7 @@ class Level(Protocol):
 
     def _level_unlocked(self, player: Player) -> bool:
         """Return True if level is unlocked."""
-        level = player.history.summary()
+        level = player.summary
         return any(run["available"] for run in level if run["lvl_id"] == self.id) if level else False
 
     async def run(self, interaction: Interaction, map: Map) -> None:
@@ -131,10 +131,9 @@ class Level(Protocol):
                         break
             if next_interaction is None or question_view.status in [QuestionStatus.EXITED, QuestionStatus.INCORRECT]:
                 break
-        else:
-            await self.on_success(next_interaction)
-
         if next_interaction is not None:
+            if question_view.status == QuestionStatus.CORRECT:
+                await self.on_success(next_interaction)
             next_interaction = await self.return_to_map(interaction, map)
 
     async def on_failure(self, interaction: Interaction) -> Interaction:
@@ -202,7 +201,7 @@ class Level(Protocol):
     async def on_success(self, interaction: Interaction) -> Interaction:
         """Call when the player succeeds the level."""
         player = PlayerRepo().get(interaction.user.name)
-        player.complete_level(level=self.id, score=self.hearts)
+        player.complete_level(level=self.id, score=1)
         PlayerRepo().save(player)
         return await self._success_story(interaction=interaction)
 
