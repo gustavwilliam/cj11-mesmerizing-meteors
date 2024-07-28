@@ -228,8 +228,22 @@ class Level11(Level):  # noqa: D101
 class LevelA(Level):  # noqa: D101
     id = 12
     name = "Level A"
-    topic = "Code Golfing"
+    topic = "Quadratic Quest"
     map_position = (8, -2)
+
+
+class LevelB(Level):  # noqa: D101
+    id = 13
+    name = "Level B"
+    topic = "Fusion Master"
+    map_position = (12, 1)
+
+
+class LevelC(Level):  # noqa: D101
+    id = 14
+    name = "Level C"
+    topic = "Final Frontier"
+    map_position = (13, 4)
 
 
 def register_all_levels() -> None:
@@ -246,3 +260,5 @@ def register_all_levels() -> None:
     Level10.register()
     Level11.register()
     LevelA.register()
+    LevelB.register()
+    LevelC.register()
