@@ -134,8 +134,10 @@ async def on_ready() -> None:
     except discord.DiscordException as e:
         print(f"Err: {e}")
 
-    register_all_levels()
-    print("Loaded levels:", ", ".join(str(level.id) for level in Controller().levels))
+
+# Load levels
+register_all_levels()
+print("Loaded levels:", ", ".join(str(level.id) for level in Controller().levels))
 
 
 # Start the bot
