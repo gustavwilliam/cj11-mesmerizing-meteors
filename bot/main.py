@@ -31,30 +31,30 @@ async def help_command(interaction: discord.Interaction) -> None:
     """Help command."""
     embed = discord.Embed(
         description="## Available commands",
-        color=discord.Color.blurple(),  # Set the color of the embed
+        color=discord.Color.blurple(),
     )
     embed.add_field(name="`/play`", value="Play the Python Adventures game", inline=False)
 
-    embed.add_field(name="", value="\n\n", inline=False)
+    embed.add_field(name="", value="\n\n", inline=False)  # Make space between level fields
 
     embed.add_field(
         name="`/eval <code>`",
         value=('Runs the evaluator on a given <`code`>\n**Usage:** `/eval "code"` (code must be a snippet)'),
         inline=False,
     )
-    embed.add_field(name="", value="\n\n", inline=False)
+    embed.add_field(name="", value="\n\n", inline=False)  # Make space between level fields
 
     embed.add_field(
         name="`/level <x>`",
         value=("Runs the game at level <`x`>\n**Usage:** `level x` (x must be an existing level)"),
         inline=False,
     )
-    embed.add_field(name="", value="\n\n", inline=False)
+    embed.add_field(name="", value="\n\n", inline=False)  # Make space between level fields
 
     embed.add_field(name="`/help`", value="Displays this help message.", inline=False)
 
-    embed.set_thumbnail(url="https://i.imgur.com/e1tfdYP.png")
     embed.set_author(name="Python Adventures")
+
     await interaction.response.send_message(embed=embed)
 
 
