@@ -4,7 +4,7 @@ from typing import Protocol
 
 import discord
 from controller import Controller
-from database.models.player import Player, PlayerRepo
+from database.models.player import Player, PlayerRepo, Position
 from discord import File, Interaction
 from map import Map, generate_map, image_to_discord_file
 from questions import Question, QuestionStatus, question_factory
@@ -61,9 +61,17 @@ class Level(Protocol):
 
     async def return_to_map(self, interaction: Interaction, map: Map) -> None:
         """Return to the map after the level is exited."""
+        position = map.player.get_position()
+        if position == (12, 1):  # Move player out of B cave
+            position = Position(11, 1)
+        if position == (13, 4):  # Move player out of C cave
+            position = Position(12, 4)
+        map.player.set_position(*position)
+        PlayerRepo().save(map.player)
+
         img = image_to_discord_file(
             generate_map(
-                map.player.get_position(),
+                position=position,
                 player_username=interaction.user.name,
                 player_display_name=interaction.user.display_name,
             ),
@@ -140,6 +148,7 @@ class Level(Protocol):
                     color=discord.Color.red(),
                 ),
             ],
+            continue_button_style=discord.ButtonStyle.danger,
         )
         await interaction.edit_original_response(
             embed=story.first_embed(),
@@ -152,16 +161,30 @@ class Level(Protocol):
         await story.last_interaction.response.defer()
         return story.last_interaction
 
+    def _success_page(self) -> StoryPage:
+        """Return the success pages for the level.
+
+        This can be overridden by subclasses to add more pages to the success story, or to change the success page.
+        """
+        return StoryPage(
+            title="Level complete!",
+            description="Well done completing the level.",
+            image_path=Path("bot/assets/level-success.png"),
+            color=discord.Color.green(),
+        )
+
+    def _success_more_pages(self) -> list[StoryPage]:
+        """Return additional success pages for the level.
+
+        This can be overridden by subclasses to add more pages to the success story.
+        Defaults to an adding no additional pages.
+        """
+        return []
+
     async def _success_story(self, interaction: Interaction) -> Interaction:
         story = StoryView(
-            pages=[
-                StoryPage(
-                    title="Level complete!",
-                    description="Well done completing the level.",
-                    image_path=Path("bot/assets/level-success.png"),
-                    color=discord.Color.green(),
-                ),
-            ],
+            pages=[self._success_page(), *(self._success_more_pages())],
+            continue_button_style=discord.ButtonStyle.success,
         )
         await interaction.edit_original_response(
             embed=story.first_embed(),
@@ -179,26 +202,7 @@ class Level(Protocol):
         player = PlayerRepo().get(interaction.user.name)
         player.complete_level(level=self.id, score=self.hearts)
         PlayerRepo().save(player)
-        story = StoryView(
-            pages=[
-                StoryPage(
-                    title="Level complete!",
-                    description="Well done completing the level.",
-                    image_path=Path("bot/assets/level-success.png"),
-                    color=discord.Color.green(),
-                ),
-            ],
-        )
-        await interaction.edit_original_response(
-            embed=story.first_embed(),
-            attachments=story.first_attachments(),
-            view=story,
-        )
-        await story.wait()
-        if story.last_interaction is None:
-            raise ValueError
-        await story.last_interaction.response.defer()
-        return story.last_interaction
+        return await self._success_story(interaction=interaction)
 
 
 class Level1(Level):  # noqa: D101
@@ -291,6 +295,18 @@ class Level11(Level):  # noqa: D101
         PlayerRepo().save(player)
         return await super().on_success(interaction)
 
+    def _success_more_pages(self) -> list[StoryPage]:
+        return [
+            *super()._success_more_pages(),
+            StoryPage(
+                title="Special level B unlocked!",
+                description="You have completed the final level of the normal path of the game. \
+                    Now it's time for you to prove your skills in the *special levels*.",
+                image_path=Path("bot/assets/unlocked-b.png"),
+                color=discord.Color.green(),
+            ),
+        ]
+
 
 class LevelA(Level):  # noqa: D101
     id = 12
@@ -312,12 +328,35 @@ class LevelB(Level):  # noqa: D101
         PlayerRepo().save(player)
         return await super().on_success(interaction)
 
+    def _success_more_pages(self) -> list[StoryPage]:
+        return [
+            *super()._success_more_pages(),
+            StoryPage(
+                title="Special level C unlocked!",
+                description="You have completed a special level. Complete the newly unlocked *special level C* \
+                    to complete the whole game! This is the final level.",
+                image_path=Path("bot/assets/unlocked-c.png"),
+                color=discord.Color.green(),
+            ),
+        ]
+
 
 class LevelC(Level):  # noqa: D101
     id = 14
     name = "Level C"
     topic = "Code Golf Master"
     map_position = (13, 4)
+
+    def _success_page(self) -> StoryPage:
+        return StoryPage(
+            title="You finished Python Adventures!",
+            description="You have completed all levels of the game — well done! While this may be the end of \
+                Python Adventures, it is only the beginning of *your* Python adventure. \
+                    Keep coding and keep learning!\n\nThank you for playing our game. We hope you enjoyed it :)\n\
+                        ~ Mesmerizing Meteors",
+            image_path=Path("bot/assets/game-win.png"),
+            color=discord.Color.yellow(),
+        )
 
 
 def register_all_levels() -> None:

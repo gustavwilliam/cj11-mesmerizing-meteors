@@ -35,15 +35,18 @@ class StoryPage:
 class StoryView(discord.ui.View):
     """Story pages, with an image/text in an embed, allowing the user to continue."""
 
-    def __init__(self, pages: list[StoryPage], *, skippable: bool = False) -> None:
+    def __init__(
+        self,
+        pages: list[StoryPage],
+        continue_button_style: discord.ButtonStyle = discord.ButtonStyle.primary,
+    ) -> None:
         super().__init__()
         if len(pages) < 1:
             raise ValueError
         self.pages = pages
-        self.skippable = skippable
         self.current_page = 0
+        self.continue_button.style = continue_button_style
         self.last_interaction: discord.Interaction | None = None
-        self.skip_button.disabled = not skippable
 
     def _next_page(self) -> None:
         """Turn to the next page only, but don't send the response.
@@ -83,13 +86,7 @@ class StoryView(discord.ui.View):
         self.last_interaction = interaction
         self.stop()
 
-    @discord.ui.button(label="Continue", style=discord.ButtonStyle.success)
+    @discord.ui.button(label="Continue", style=discord.ButtonStyle.primary)
     async def continue_button(self, interaction: discord.Interaction, _: discord.ui.Button) -> None:
         """Show the next page."""
         await self.show_next_page(interaction)
-
-    @discord.ui.button(label="Skip", style=discord.ButtonStyle.secondary, custom_id="skip_button")
-    async def skip_button(self, interaction: discord.Interaction, _: discord.ui.Button) -> None:
-        """Skip the story."""
-        if self.skippable:
-            self.end(interaction)
