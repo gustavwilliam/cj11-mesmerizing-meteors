@@ -4,9 +4,9 @@ from typing import NamedTuple, Protocol
 
 from database.database import PlayerDetail
 
-LEVELS = [1, 2, 3, 4, 5, 6, 7, 8, "A", "B", "C"]
-SPECIAL_LEVELS = {"A": 9, "B": 10, "C": 11}
-MAX_LEVEL = 8
+LEVELS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+SPECIAL_LEVELS = [12, 13, 14]
+MAX_LEVEL = 11  # Last level on the standard path of the game
 
 
 class Position(NamedTuple):
@@ -45,31 +45,32 @@ class PlayDetail:
         self.completed = completed
 
     def __eq__(self, other: PlayDetail) -> bool:
-        return self.username == other.username and self.level == other.level
+        return self.username == other.username and self.level == other.level and self.completed == other.completed
 
     def __hash__(self) -> int:
         return hash((self.username, self.level))
 
     def __gt__(self, other: PlayDetail) -> bool:
         if self.level == other.level:
-            return self.score > other.score
+            if self.completed == other.completed:
+                return self.score > other.score
+            return self.completed > self.completed
         return LEVELS.index(self.level) > LEVELS.index(other.level)
 
     def __ge__(self, other: PlayDetail) -> bool:
         if self.level == other.level:
-            return self.score >= other.score
-        return LEVELS.index(self.level) > LEVELS.index(other.level)
+            if self.completed == other.completed:
+                return self.score >= other.score
+            return self.completed >= self.completed
+        return LEVELS.index(self.level) >= LEVELS.index(other.level)
 
     @property
     def level_value(self) -> int | str:
         """Return player level.
 
-        All levels are internally stored as integers (1-11).
-        Special levels 9 to 11 are presented as alphabets 'A' - 'C'
-        Calling `play.level` returns the right representation of the
-        play.
+        All levels are internally stored as integers (1-14).
         """
-        return SPECIAL_LEVELS.get(self.level) or self.level
+        return self.level
 
     def as_dict(self) -> dict:
         """Represent play object as dictionary."""
@@ -83,7 +84,7 @@ class PlayDetail:
             "completed": self.completed,
         }
 
-    def is_special(self) -> True:
+    def is_special(self) -> bool:
         """Check if play is for a special level."""
         return self.level in SPECIAL_LEVELS
 
@@ -99,9 +100,8 @@ class PlayHistory(list):
 
     def __contains__(self, item: str | PlayDetail) -> bool:
         if isinstance(item, str) and item.startswith("lvl"):
-            level = item[3:]
-            # get the integer value of level if it is a special level
-            level = SPECIAL_LEVELS.get(level) or int(level)
+            level = item[3:]  # Remove leading 'lvl'
+            level = int(level)
             return bool(any(play.level_value == level for play in self))
 
         return super().__contains__(item)
@@ -114,14 +114,12 @@ class PlayHistory(list):
         >>> playhistory['lvl5' : 'lvl7'] # return plays with levels in [5,6,7]
         >>> playhistory['lvl7' : 'lvl2'] # returns an empty playhistory
         >>> playhistory[0] # normal indexing
-        >>> playhistory['lvlA' : 'lvlC'] # returns plays with levels in [A,B,C]
-        >>> playhistory['lvlA' : ] # currently doesn't work as expected!!!, would raise an Exception
         """
         if isinstance(index, str):
             if index.startswith("lvl"):
-                level = index[3:]
-                level = SPECIAL_LEVELS.get(level) or int(level)
-                return self._get_plays_by_level(level)
+                level = index[3:]  # Remove leading 'lvl'
+                level = int(level)
+                return self.get_plays_by_level(level)
             error = f"Invalid string value: {index}"
             raise ValueError(error)
 
@@ -129,15 +127,15 @@ class PlayHistory(list):
             start, stop = index.start, index.stop
             if isinstance(start, str) and isinstance(stop, str):
                 if start.startswith("lvl") and stop.startswith("lvl"):
-                    start = SPECIAL_LEVELS.get(level) or int(start[3:])
-                    stop = SPECIAL_LEVELS.get(level) or int(stop[3:])
-                    return self._get_plays_by_level(start=start, stop=stop)
+                    start = int(start[3:])  # Remove leading 'lvl'
+                    stop = int(stop[3:])  # Remove leading 'lvl'
+                    return self.get_plays_by_level(start=start, stop=stop)
                 error = "Invalid string slice object : {index}. Use slice(lvlid, lvlid)"
                 raise ValueError(error)
 
         return super().__getitem__(index)
 
-    def _get_plays_by_level(self, start: int, stop: int | None = None) -> PlayHistory:
+    def get_plays_by_level(self, start: int, stop: int | None = None) -> PlayHistory:
         """Return plays for a given level or within a range of levels."""
         if stop is None:
             return self.__class__([play for play in self if play.level_value == start], username=self.username)
@@ -197,16 +195,7 @@ class Player:
         return play.level if play.level == MAX_LEVEL else play.level + 1
 
     @property
-    def special_levels_unlocked(self) -> list:
-        """Return special levels availabe to user."""
-        unlocked_levels = []
-        if "lvl4" in self.history:
-            unlocked_levels.append("lvlA")
-        # logic for unlocking other special levels should be added here
-        return unlocked_levels
-
-    @property
-    def summary(self) -> dict:
+    def summary(self) -> list[dict]:
         """Return player summary as a dictionary."""
         # Available levels is a list of:
         # - completed level
@@ -225,19 +214,29 @@ class Player:
             },
         )
 
-        # include unlocked levels not yet completed
-        for level in self.special_levels_unlocked:
-            if level not in self.history:
-                summary.append({"lvl_id": level, "available": True, "completed": False})
+        # If summary does not include completed special levels, add uncompleted but available special levels
+        special_levels = set(self.history.get_plays_by_level(start=12))
+        for special in special_levels:
+            if special.completed:
+                continue
+            summary.append(special.summary())
 
         return summary
 
     @property
-    def new_data(self) -> dict:
+    def new_data(self) -> list[dict]:
         """Returns data added to history but not in database."""
         if not self.history:
             return [{"username": self.username, "level": 1, "score": 0, "completed": False}]
         return [play.as_dict() for play in self.history.new_plays]
+
+    def unlock_level(self, level: int) -> None:
+        """Unlock level for player."""
+        if (plays := self.history.get_plays_by_level(level)) and not any(filter(lambda play: play.available, plays)):
+            print(f"Level {level} is already unlocked")
+            return  # Level is already unlocked
+        play = PlayDetail(username=self.username, level=level, score=0, available=True, completed=False)
+        self.history.append(play)
 
     def complete_level(self, level: int, score: int) -> None:
         """Mark level as completed."""

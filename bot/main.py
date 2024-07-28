@@ -123,6 +123,17 @@ async def eval_code(interaction: discord.Interaction, *, code: str) -> None:
     )
 
 
+@bot.tree.command(name="complete", description="complete level")
+async def complete_level(interaction: discord.Interaction, level: int) -> None:
+    """Complete a level."""
+    level_object = Controller().get_level_by_id(level)
+    if level_object is None:
+        await interaction.response.send_message("Level not found.", ephemeral=True)
+        return
+    await interaction.response.defer(ephemeral=True, thinking=False)
+    await level_object().on_success(interaction=interaction)
+
+
 # Bot ready message
 @bot.event
 async def on_ready() -> None:

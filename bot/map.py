@@ -296,7 +296,18 @@ def get_map_name(player_name: str) -> str:
     """Get the file name for the map version that only has the player's levels unlocked."""
     player = PlayerRepo().get(player_name)
     file_name = "map-done" if player.max_level == 11 else f"map-lvl{player.next_level}"  # noqa: PLR2004, 11 is last level
-    return f"{file_name}.png"
+
+    completed_levels = player.history.summary(completed=True)
+    all_levels = player.history.summary()
+    special = ""
+    if any(level["lvl_id"] == 12 for level in completed_levels):  # noqa: PLR2004
+        special += "a"
+    if any(level["lvl_id"] == 13 for level in all_levels):  # noqa: PLR2004
+        special += "b"
+    if any(level["lvl_id"] == 14 for level in all_levels):  # noqa: PLR2004
+        special += "c"
+
+    return f"{file_name}{f'-{''.join(lvl for lvl in special)}' if special else ''}.png"
 
 
 def generate_map(
