@@ -60,9 +60,7 @@ class Question(Protocol):
 
     def get_embed_description(self, question_index: int) -> str:
         """Return the description for the embed message."""
-        return f"## Question {question_index}\n{self.question}" + (
-            "\n\n*Hints:*\n" + "\n".join(self.hints[: self.unlocked_hints]) if self.unlocked_hints else ""
-        )
+        return f"## Question {question_index}\n{self.question}"
 
     def embed(self, level: "Level", question_index: int) -> Embed:
         """Return an embed message for the question."""
@@ -263,12 +261,14 @@ class WriteCodeQuestion(Question):
         hints: list[str],
         test_cases: list[dict[str, str]],
         pre_code: str | None = None,
+        pre_submit_code: str | None = None,
     ) -> None:
         self.type = "write_code"
         self.question = question
         self.hints = hints
         self.pre_code = pre_code
         self.unlocked_hints = 0
+        self.pre_submit_code = pre_submit_code
         self.test_cases = test_cases
 
     async def check_response(self, code: str) -> bool:
@@ -312,7 +312,10 @@ class WriteCodeQuestion(Question):
             test_strings.append(self._get_assert_equal_string(input, output))
         return (
             "import unittest\n"  # Import unittest module
-            + ("" if self.pre_code is None else self.pre_code)  # Adds code to run before user code, no newline after
+            + ("" if self.pre_code is None else self.pre_code + "\n")  # Adds code to run before user code
+            + (
+                "" if self.pre_submit_code is None else self.pre_submit_code
+            )  # Code to collect user output from one-liner, without a line break after it
             + user_code.expandtabs(2)  # Insert user code. Tabs -> spaces for consistency with test code
             + "\nclass Test(unittest.TestCase):\n"  # Setup test class
             + " def test_cases(self):"  # Setup test method
@@ -325,6 +328,7 @@ class WriteCodeQuestion(Question):
         return (
             super().get_embed_description(question_index)
             + "\n\n*Tip: press the Code Playground button to try out your code before submitting!*"
+            + " :warning: *But there and **ONLY THERE** you will need to use `print(...)` to see the result*"
         )
 
 
@@ -439,14 +443,17 @@ class WriteCodeQuestionView(QuestionView):
             return
 
         await modal.submit_interaction.response.defer(thinking=True, ephemeral=True)
-        code_input = modal.code_input.value
+        code_input = (self.question.pre_code or "") + "\n" + modal.code_input.value
         output = await eval_python(code_input)
+        print("Output: ", output)
+        output = output[:1900] if len(output) > 0 and output != "\n" else "No output"
+        embed = Embed(
+            title="Code Playground Results",
+            description=f"**Input:**\n```py\n{code_input}\n```\n**Output:**\n```py\n{output}\n```",
+            color=discord.Color.blurple(),
+        )
         await modal.submit_interaction.followup.send(
-            embed=Embed(
-                title="Code Playground Results",
-                description=f"**Input:**\n```py\n{code_input}\n```\n**Output:**\n```py\n{output[:1900]}\n```",
-                color=discord.Color.blurple(),
-            ),
+            embed=embed,
             ephemeral=True,
         )
 

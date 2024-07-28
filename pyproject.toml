@@ -41,6 +41,8 @@ ignore = [
     # Annotations.
     "ANN101",
     "ANN102",
+    # Too many function arguments.
+    "PLR0913",
 ]
 
 # Ignore assert error for tests

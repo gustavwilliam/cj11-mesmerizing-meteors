@@ -22,7 +22,8 @@
         "The list comprehension should have the form `[expression for item in iterable]`.",
         "The `expression` should square the `item`."
       ],
-      "pre_code": "numbers=[1,2,3,4,5]\nsquares=",
+      "pre_code": "numbers=[1, 2, 3, 4, 5]",
+	  "pre_submit_code": "squares=",
       "test_cases": [
         {
           "input": "squares",
