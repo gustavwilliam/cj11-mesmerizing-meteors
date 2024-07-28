@@ -524,11 +524,13 @@
   ],
   "12": [
 	{
-		"type": "write_code",
-		"question": "Golf the following code to return the sum of squares of a list of integers. The maximum characters allowed is 50.\n\n```python\ndef sum_of_squares(nums):\n    result = 0\n    for num in nums:\n        result += num ** 2\n    return result\n```",
+		"type": "write_golf_code",
+		"question": "Golf the following code to return the sum of squares of a list of integers.\n```python\ndef sum_of_squares(nums):\n    result = 0\n    for num in nums:\n        result += num ** 2\n    return result\n```",
 		"hints": [
+			"Remove any spaces that aren't strictly necessary.",
+			"Use built-in functions to minimize code length.",
 			"Use a single line list comprehension.",
-			"Use built-in functions to minimize code length."
+			"Remember -- it only has to work. It doesn't have to be readable!"
 		],
 		"test_cases": [
 			{
@@ -540,7 +542,7 @@
 				"output": "125"
 			}
 		],
-		"max_characters": 50
+		"max_characters": 45
 	}
   ]
 }

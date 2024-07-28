@@ -225,6 +225,13 @@ class Level11(Level):  # noqa: D101
     map_position = (6, 6)
 
 
+class LevelA(Level):  # noqa: D101
+    id = 12
+    name = "Level A"
+    topic = "Code Golfing"
+    map_position = (8, -2)
+
+
 def register_all_levels() -> None:
     """Register all levels with the controller."""
     Level1.register()
@@ -238,3 +245,4 @@ def register_all_levels() -> None:
     Level9.register()
     Level10.register()
     Level11.register()
+    LevelA.register()
