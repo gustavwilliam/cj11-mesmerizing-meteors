@@ -213,6 +213,30 @@ class Level1(Level):  # noqa: D101
     topic = "List Comprehensions"
     map_position = (1, 0)
 
+    async def run(self, interaction: Interaction[discord.Client], map: Map) -> None:
+        """Run the level. Overwrites to add a notice about hearts on first level."""
+        await interaction.response.defer(thinking=True)
+        story = StoryView(
+            [
+                StoryPage(
+                    "Quick note about lives",
+                    "You have three lives for every level. If you answer a question incorrectly, you will lose a life.\
+ Lose all 3 and you lose the level. Keep track of your current lives in the top right corner of the question embed.",
+                    Path("bot/assets/guide-hearts.png"),
+                ),
+            ],
+            user=interaction.user,
+        )
+        await interaction.followup.send(
+            embed=story.first_embed(),
+            file=story.first_attachments()[0],
+            view=story,
+        )
+        await story.wait()
+        if story.last_interaction is None:
+            return None
+        return await super().run(story.last_interaction, map)
+
 
 class Level2(Level):  # noqa: D101
     id = 2
