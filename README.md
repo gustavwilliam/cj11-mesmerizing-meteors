@@ -39,4 +39,3 @@ Install the dependencies using `pip install -r requirements.txt`. If you are dev
    - Create a .env file in the root of your project and add your Discord API Token: `DISCORD_BOT_KEY="your-discord-token-here"`
 
 4. **Run the Bot**: `python bot/main.py`
-
