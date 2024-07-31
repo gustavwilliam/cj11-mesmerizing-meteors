@@ -31,7 +31,7 @@ To get your Discord bot up and running, follow these steps:
 
 2. **Install Requirements**:
    > - You can create a virtual environment by `python -m venv .venv`
-   > - Activate it by `.venv/bin/activate` then pursue the setup
+   > - Activate it by `source .venv/bin/activate` then pursue the setup
 
 Ensure you have `python` installed then install dependencies by `pip install -r requirements.txt`
 
