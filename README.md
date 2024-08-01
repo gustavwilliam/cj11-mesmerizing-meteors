@@ -6,6 +6,51 @@ https://github.com/user-attachments/assets/8f392225-6d21-464f-9e55-bc74ca643df3
 
 Python Adventures is a Discord game bot where you learn about Python features while progressing your character through a map filled with challenges and secrets!
 
+## Theme: Information Overload
+Python Adventures immerses players in a learning environment filled with information-rich levels. Each level combines multiple-choice questions and intricate coding challenges, demanding players process and apply vast amounts of information quickly and accurately. The special code golfing levels take this to the next level by requiring players to deal with dense, compact code — all while keeping it light and playful.
+
+# Gameplay
+
+Follow the main character Maria as she sets out on an epic journey to becoming a true Pythonista! The main storyline of the game consists of 11 levels, where completing one unlocks the next.
+
+## Map
+
+![Map](presentation/levels.png)
+
+The levels 1-11 consist of both multiple-choice questions and code writing challenges, to make learning exciting and really challenge your unstanding of the topics at hand.
+
+There are also three *special* levels A, B and C, outside of the main storyline, which tackle code golfing. If your brain doesn't get overloaded from the compact information in oneliners and hacky ways of writing code, these levels perfect for you!
+
+### Navigation
+![Map navigation](/presentation/map-navigation.png)
+
+To move between levels in Python Adventures, we have created a vibrant map that can be easily navigated using Discord's interaction buttons. The map is dynamically generated for the user, taking into account factors such as the following:
+- **Unlocked levels**, including special levels
+- **Completed levels**
+- **Current player position**, persisted between sessions
+- **Player display name**, for the name tag
+
+In order to not clutter up the chat, navigation simply edits the original interaction response embed with the new map state. Buttons are also dynamically enabled/disabled based on whether or not an action can be taken. For example, if a tree is in the way, moving that direction will be disabled.
+
+## Levels
+### Limited lives
+![Lives](bot/assets/guide-hearts.png)
+
+With three lives comes a maximum of three mistakes before you have to restart the level. This keeps the game exciting and turns the difficulty of even the multiple choice questions up a notch.
+
+### Code evaluation
+The most important part of learning to code is writing code and actually trying things yourself. Because of this, we have made code writing an integral part of the levels, providing a Code Playground to test run your code before submitting. And once submitted, we run a battery of unit tests on the code to ensure it passes the requirements.
+
+By utilizing the [Tio.run](https://tio.run) API to evaluate code, we are able to evaluate and test user code without needing to set up a sandboxed environment and without risking malicious input causing issues for the machine running the bot.
+
+### Hints
+Sometimes you get stuck on a problem. While revealing the answer straight away won't help you much in learning, getting a hint or two in the right direction can be a game changer. We have provided hints for all questions that can be accessed one at a time by pressing the **Hint** button:
+
+![Hints](presentation/hints.png)
+
+### Success/defeat/win screens
+![Status screens](presentation/level-statuses.png)
+
 # Setup instructions
 ## Discord API Token
 What is a Discord API Token?
