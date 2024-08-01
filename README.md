@@ -59,7 +59,7 @@ A Discord API Token is a unique identifier used to authenticate requests to the 
 
 ## Installation and Setup
 To get your Discord bot up and running, follow these steps:
-1. **Clone the repository**: `git clone github.com/gustavwilliam/cj11-mesmerizing-meteors && cd cj11-mesmerizing-meteors`
+1. **Clone the repository**: `git clone https://github.com/gustavwilliam/cj11-mesmerizing-meteors.git && cd cj11-mesmerizing-meteors`
 
 2. **Install Requirements**:
    > - You can create a virtual environment by `python -m venv .venv`
