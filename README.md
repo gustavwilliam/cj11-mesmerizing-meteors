@@ -51,6 +51,12 @@ Sometimes you get stuck on a problem. While revealing the answer straight away w
 ### Success/defeat/win screens
 ![Status screens](presentation/level-statuses.png)
 
+With vibrant success/fail messages depending on how a level went for the player, we hope to keep the player engaged and excited to move toward the next goal. The images above are some of these and are displayed in the following situations:
+- **Level failed**: the user fails a level
+- **Level success**: the user completes a level
+- **New level unlocked**: displayed after "level success" when the B or C level is unlocked
+- **You win**: displayed when completing the final level of the game (level C) together with a message from the developers :)
+
 # Setup instructions
 ## Discord API Token
 What is a Discord API Token?
