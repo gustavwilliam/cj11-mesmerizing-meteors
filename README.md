@@ -16,12 +16,14 @@ Follow the main character Maria as she sets out on an epic journey to becoming a
 ## Map
 
 ![Map](presentation/levels.png)
+
 The levels 1-11 consist of both multiple-choice questions and code writing challenges, to make learning exciting and really challenge your unstanding of the topics at hand.
 
 There are also three *special* levels A, B and C, outside of the main storyline, which tackle code golfing. If your brain doesn't get overloaded from the compact information in oneliners and hacky ways of writing code, these levels perfect for you!
 
 ### Navigation
 ![Map navigation](/presentation/map-navigation.png)
+
 To move between levels in Python Adventures, we have created a vibrant map that can be easily navigated using Discord's interaction buttons. The map is dynamically generated for the user, taking into account factors such as the following:
 - **Unlocked levels**, including special levels
 - **Completed levels**
@@ -33,6 +35,7 @@ In order to not clutter up the chat, navigation simply edits the original intera
 ## Levels
 ### Limited lives
 ![Lives](bot/assets/guide-hearts.png)
+
 With three lives comes a maximum of three mistakes before you have to restart the level. This keeps the game exciting and turns the difficulty of even the multiple choice questions up a notch.
 
 ### Code evaluation
@@ -47,6 +50,7 @@ Sometimes you get stuck on a problem. While revealing the answer straight away w
 
 ### Success/defeat/win screens
 ![Status screens](presentation/level-statuses.png)
+
 With vibrant success/fail messages depending on how a level went for the player, we hope to keep the player engaged and excited to move toward the next goal. The images above are some of these and are displayed in the following situations:
 - **Level failed**: the user fails a level
 - **Level success**: the user completes a level
