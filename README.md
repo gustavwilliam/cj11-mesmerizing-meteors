@@ -53,6 +53,58 @@ With vibrant success/fail messages depending on how a level went for the player,
 - **New level unlocked**: displayed after "level success" when the B or C level is unlocked
 - **You win**: displayed when completing the final level of the game (level C) together with a message from the developers :)
 
+# Software architecture
+
+In order to create a game that is easy to maintain and simple to add new features to without breaking existing ones, we have put a lot of effort into designing a software architecture for the game that will allow precisely that.
+
+## Level/questions
+
+Here is a diagram that explains the general level-question software architecture:
+
+![CJ architecture](presentation/CJ_architecture.png)
+
+### Adding a new level
+
+This is how a new level is added:
+- Subclass `Level` and set the desired attributes
+- Adding `Level.register()` in the `register_all_levels()` function
+- Add the level's questions in `questions.json`
+
+The new level is now accessible and ready to be used anywhere in the bot through the `Controller` class! The map description, buttons and functionality at the provided coordinte will automatically match what was provided in the `Level` class. Better yet, all questions in `questions.json` will be automatically parsed, loaded, and ready to be used.
+
+### Adding a new question type
+
+At one point while developing the game, we decided to add a code golf class. In a few minutes, the class was ready to go! By subclassing `WriteCodeQuestion` (which itself is a subclass of `Question`), the code golf question type got all the code execution, unit test and normal "question" logic from the `WriteCodeQuestion` and `Question` classes.
+
+This is how a new question type is added:
+- Subclass `Question` and set the desired attributes
+- *Optional*: overwrite functions for question parsing, running, on_success, on_fail and other methods
+- Add the question type to `Question.view`
+- Add the question type to `question_factory`
+
+Your question type is now fully supported by the bot and questions of the type can be added to `questions.json`!
+
+### Modifying default behavior
+
+One major feature of the software architecture at hand, is the ability to extend and overwrite default functionality in question types and levels without touching the base classes. Here are a few of the supported overwrites:
+
+**Question**
+- `check_response`: logic to check if a given answer is correct
+- `get_embed_description` and `embed`: customize the embed send for the question
+
+**QuestionView**
+- `on_quit`: called when the user presses "Quit"
+- `on_success`: called when the user succeeds with a question
+- `on_fail`: called when the user answers a question incorrectly
+
+**Level**
+- `run`: asks the user questions, displays status screen when level is over and then returns the user to the map
+- `on_failure`: called when the user fails a level
+- `on_success`: called when the user completes a level
+- `_success_page` and `_success_more_pages`: used to customize the embeds being sent when the user completes the level, for presenting newly unlocked levels or win screens
+
+These customization options have been crucial for the following and more: showing a quickguide about lives before the first level, unlocking special levels at the right times and customizing the success screens of levels to showcase the current status. In the future, these features would also be great for integrating more story into the game or giving the player certain rewards for completing levels, questions or other tasks.
+
 # Setup instructions
 ## Discord API Token
 What is a Discord API Token?
