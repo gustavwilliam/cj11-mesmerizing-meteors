@@ -6,6 +6,31 @@ https://github.com/user-attachments/assets/8f392225-6d21-464f-9e55-bc74ca643df3
 
 Python Adventures is a Discord game bot where you learn about Python features while progressing your character through a map filled with challenges and secrets!
 
+## Table of contents
+- [Python Adventures](#python-adventures)
+  - [Table of contents](#table-of-contents)
+  - [Theme: Information Overload](#theme-information-overload)
+- [Gameplay](#gameplay)
+  - [Map](#map)
+    - [Navigation](#navigation)
+  - [Levels](#levels)
+    - [Limited lives](#limited-lives)
+    - [Code evaluation](#code-evaluation)
+    - [Hints](#hints)
+    - [Success/defeat/win screens](#successdefeatwin-screens)
+- [Software architecture](#software-architecture)
+  - [Level/questions](#levelquestions)
+    - [Adding a new level](#adding-a-new-level)
+    - [Adding a new question type](#adding-a-new-question-type)
+    - [Modifying default behavior](#modifying-default-behavior)
+- [Setup instructions](#setup-instructions)
+  - [Discord API Token](#discord-api-token)
+  - [How to Obtain a Discord API Token](#how-to-obtain-a-discord-api-token)
+  - [Discord Developer Portal Settings](#discord-developer-portal-settings)
+  - [Installation and Setup](#installation-and-setup)
+- [Contributions](#contributions)
+
+
 ## Theme: Information Overload
 Python Adventures immerses players in a learning environment filled with information-rich levels. Each level combines multiple-choice questions and intricate coding challenges, demanding players process and apply vast amounts of information quickly and accurately. The special code golfing levels take this to the next level by requiring players to deal with dense, compact code — all while keeping it light and playful.
 
