@@ -1,8 +1,10 @@
 # Python Adventures
 
-![Title art](bot/assets/title-art.png)
+https://github.com/user-attachments/assets/8f392225-6d21-464f-9e55-bc74ca643df3
 
-Python Adventures is a discord game bot where you learn about Python features while progressing your character through a map.
+*🔈Volume on*
+
+Python Adventures is a Discord game bot where you learn about Python features while progressing your character through a map filled with challenges and secrets!
 
 # Setup instructions
 ## Discord API Token
